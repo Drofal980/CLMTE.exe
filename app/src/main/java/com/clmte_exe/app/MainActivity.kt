@@ -21,7 +21,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import com.clmte_exe.app.ui.theme.CLMTEexeTheme
 
@@ -62,10 +61,12 @@ fun CLMTEexeApp() {
         }
     ) {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            Greeting(
-                name = currentDestination.label,
-                modifier = Modifier.padding(innerPadding)
-            )
+            val modifier = Modifier.padding(innerPadding)
+            when (currentDestination) {
+                AppDestinations.HOME -> HomePage(modifier)
+                AppDestinations.MY_CAR -> MyCarPage(modifier)
+                AppDestinations.SETTINGS -> SettingsPage(modifier)
+            }
         }
     }
 }
@@ -77,20 +78,4 @@ enum class AppDestinations(
     HOME("Home", Icons.Default.Home),
     MY_CAR("My Car", R.drawable.ic_car),
     SETTINGS("Settings", Icons.Default.Settings),
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    CLMTEexeTheme {
-        Greeting("Android")
-    }
 }
