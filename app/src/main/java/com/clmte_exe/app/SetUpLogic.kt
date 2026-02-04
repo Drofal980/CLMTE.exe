@@ -2,12 +2,6 @@ package com.clmte_exe.app
 
 class SetUpLogic {
 
-    // How the user will setup their car.
-    enum class SetupMethod {
-        VIN,
-        MANUAL
-    }
-
     // Main car model used.
     data class Car(
         val nickName: String?,
