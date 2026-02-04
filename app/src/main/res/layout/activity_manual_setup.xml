@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#C0C0C0">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Manual Setup"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="12dp"/>
+
+        <EditText
+            android:id="@+id/inputNickname"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Car Nickname"/>
+
+        <EditText
+            android:id="@+id/inputMake"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Make"/>
+
+        <EditText
+            android:id="@+id/inputModel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Model"/>
+
+        <EditText
+            android:id="@+id/inputYear"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Year"
+            android:inputType="number"/>
+
+        <EditText
+            android:id="@+id/inputCarType"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Car Type (Sedan, Truck, SUV, etc)"/>
+
+        <EditText
+            android:id="@+id/inputEngineSize"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Engine Size (optional)"
+            android:inputType="numberDecimal"/>
+
+        <Button
+            android:id="@+id/submitManual"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Finish Setup"
+            android:layout_marginTop="16dp"/>
+    </LinearLayout>
+</ScrollView>
