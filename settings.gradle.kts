@@ -19,6 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "CLMTE.exe"
+rootProject.name = "Win98"
 include(":app")
- 

@@ -7,10 +7,4 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-
-    <!-- Win98 Colors -->
-    <color name="win98_teal">#008080</color>
-    <color name="win98_silver">#C0C0C0</color>
-    <color name="win98_blue">#000080</color>
-    <color name="win98_gray">#808080</color>
 </resources>
