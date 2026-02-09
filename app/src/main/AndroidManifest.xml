@@ -10,36 +10,18 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.CLMTEexe">
-
-        <activity android:name=".StartUpActivity"
-            android:exported="true">
+        android:theme="@style/Theme.Win98">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.Win98">
             <intent-filter>
-                <!--Made the StartUpActivity launch first -->
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity
-            android:name=".DesktopActivity"
-            android:exported="true"
-            android:theme="@style/Theme.CLMTEexe">
-        </activity>
-
-        <activity
-            android:name=".MyCarActivity"
-            android:exported="false"
-            android:theme="@style/Theme.CLMTEexe.Dialog"
-            />
-
-        <activity
-        android:name=".SettingsActivity"
-        android:exported="false"
-        android:theme="@style/Theme.CLMTEexe.Dialog"
-            />
-
     </application>
 
 </manifest>

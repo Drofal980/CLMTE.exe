@@ -1,4 +1,4 @@
-package com.clmte.win98.ui.theme
+package com.clmte_exe.app.ui.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme

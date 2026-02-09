@@ -4,13 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.clmte.win98"
-    compileSdk {
-        version = release(36)
-    }
+    namespace = "com.clmte_exe.app"
+    compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.clmte.win98"
+        applicationId = "com.clmte_exe.app"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
@@ -39,6 +37,7 @@ android {
 
 dependencies {
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))

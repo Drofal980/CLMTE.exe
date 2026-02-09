@@ -59,7 +59,7 @@ class StartUpActivity: ComponentActivity() {
                 Toast.makeText(this, "Car added!", Toast.LENGTH_SHORT).show()
                 // Need to put a nav to the main screen for the user.
                 // Need to save the data somewhere.
-                val intent = Intent(this, DesktopActivity::class.java)
+                val intent = Intent(this, MainActivity::class.java)
                 startActivity(intent)
             }.onFailure { error ->
                 showError(error.message)
@@ -112,7 +112,7 @@ class StartUpActivity: ComponentActivity() {
                 Toast.makeText(this, "Car added!", Toast.LENGTH_SHORT).show()
                 // Need to put a nav to the main screen for the user.
                 // Need to save the data somewhere.
-                val intent = Intent(this, DesktopActivity::class.java)
+                val intent = Intent(this, MainActivity::class.java)
                 startActivity(intent)
 
             }.onFailure { error ->
