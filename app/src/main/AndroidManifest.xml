@@ -11,14 +11,19 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.CLMTEexe">
 
+        <activity android:name=".StartUpActivity"
+            android:exported="true">
+            <intent-filter>
+                <!--Made the StartUpActivity launch first -->
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
         <activity
             android:name=".DesktopActivity"
             android:exported="true"
             android:theme="@style/Theme.CLMTEexe">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
 
         <activity

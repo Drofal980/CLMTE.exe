@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#C0C0C0"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="VIN Setup"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="12dp"/>
+
+    <EditText
+        android:id="@+id/inputNickname"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Car Nickname"/>
+
+    <EditText
+        android:id="@+id/inputVin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="VIN (17 characters)"
+        android:layout_marginTop="8dp"/>
+
+    <Button
+        android:id="@+id/submitVin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Continue"
+        android:layout_marginTop="16dp"/>
+</LinearLayout>

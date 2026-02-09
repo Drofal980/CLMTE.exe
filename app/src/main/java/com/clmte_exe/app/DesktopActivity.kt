@@ -12,6 +12,7 @@ import android.widget.TextView
 import androidx.activity.ComponentActivity
 import androidx.activity.enableEdgeToEdge
 
+
 class DesktopActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
