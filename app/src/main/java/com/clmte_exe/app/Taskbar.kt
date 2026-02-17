@@ -23,41 +23,47 @@ fun Taskbar(
 ) {
     val time = rememberTime()
 
-    Row(
+    // The Box provides the background that extends behind the navigation bar
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(40.dp)
             .background(Color(0xFFBFBFBF))
-            .padding(horizontal = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .navigationBarsPadding() // This pushes the Row above the navigation bar
     ) {
-
-        Box(
+        Row(
             modifier = Modifier
-                .clickable { onStartClick() }
-                .padding(horizontal = 4.dp, vertical = 2.dp)
+                .fillMaxWidth()
+                .height(40.dp)
+                .padding(horizontal = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Image(
-                painter = painterResource(R.drawable.start_button),
-                contentDescription = "Start",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.height(32.dp)
-            )
+
+            Box(
+                modifier = Modifier
+                    .clickable { onStartClick() }
+                    .padding(horizontal = 4.dp, vertical = 2.dp)
+            ) {
+                Image(
+                    painter = painterResource(R.drawable.start_button),
+                    contentDescription = "Start",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.height(32.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            Box(
+                modifier = Modifier
+                    .clickable { onClockClick() }
+                    .padding(horizontal = 8.dp)
+            ) {
+                Text(
+                    text = time,
+                    fontWeight = FontWeight.Medium
+                )
+            }
         }
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        Box(
-            modifier = Modifier
-                .clickable { onClockClick() }
-                .padding(horizontal = 8.dp)
-        ) {
-            Text(
-                text = time,
-                fontWeight = FontWeight.Medium
-            )
-        }
-
     }
 }
 
