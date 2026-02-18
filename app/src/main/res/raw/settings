@@ -1,0 +1,15 @@
+{
+  "backgroundColor": "teal",
+  "fontSize": 16,
+  "notificationsEnabled": true,
+  "darkMode": false,
+
+  "availableColors": {
+    "teal": "#008080",
+    "gray": "#808080",
+    "black": "#000000",
+    "blue": "#0000FF",
+    "pink": "#FFC0CB",
+    "white": "#FDFFFF"
+  }
+}

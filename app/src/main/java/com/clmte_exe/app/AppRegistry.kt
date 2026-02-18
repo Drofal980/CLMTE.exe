@@ -13,7 +13,8 @@ data class Win98App(
     val title: String,
     val iconRes: Int,
     val type: AppType,
-    val content: @Composable (isTealBackground: Boolean, onBackgroundChange: (Boolean) -> Unit) -> Unit
+    // Content for all the settings
+    val content: @Composable (AppSettingClass, (AppSettingClass) -> Unit) -> Unit
 )
 
 val allApps = listOf(
@@ -78,10 +79,10 @@ val allApps = listOf(
         title = "Settings",
         iconRes = R.drawable.settings,
         type = AppType.SYSTEM
-    ) { isTealBackground, onBackgroundChange -> // Changing the color the background color
+    ) { settings, onSettingsChange -> // Changing the color the background color
         SettingsContain(
-            isTealBackground = isTealBackground,
-            onBackgroundChange = onBackgroundChange
+            settings = settings,
+            onSettingsChange = onSettingsChange
         )
-    },
+    }
 )

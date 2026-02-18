@@ -20,13 +20,15 @@ class MainActivity : ComponentActivity() {
         setContent {
 
             // Background color of the app
-            var isTealBackground by remember { mutableStateOf(true) }
+            val context = this
+            var settings by remember { mutableStateOf(SettingsManager.loadSettings(context)) }
+
 
             Win98Theme (
             ) {
                 DesktopScreen(
-                    isTealBackground = isTealBackground,
-                    onBackgroundChange = { isTealBackground = it}
+                    settings = settings,
+                    onSettingsChange = { settings = it }
                 )
             }
         }
