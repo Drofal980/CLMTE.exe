@@ -24,7 +24,10 @@ val accessories = allApps.filter { it.type == AppType.ACCESSORY }
 
 
 @Composable
-fun DesktopScreen() {
+fun DesktopScreen(
+    isTealBackground: Boolean,
+    onBackgroundChange: (Boolean) -> Unit
+) {
     val windowManager = remember { WindowManager() }
     var isStartMenuOpen by remember { mutableStateOf(false) }
 
@@ -45,13 +48,18 @@ fun DesktopScreen() {
         }
     }
 
-
+// color of background = 0xFF008080
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .padding(top = 42.dp)
-            .background(Color(0xFF008080))
+            .background(
+                if (isTealBackground)
+                    Color(0xFF008080)
+                else
+                    Color(0xFF000000)
+            )
     ) {
         LazyVerticalGrid(
             columns = GridCells.Fixed(3),
@@ -68,7 +76,7 @@ fun DesktopScreen() {
                     )
                 ) {
                     windowManager.openOrFocus(app.id, app.title) {
-                        app.content()
+                        app.content(isTealBackground, onBackgroundChange)
                     }
                 }
             }
@@ -88,7 +96,7 @@ fun DesktopScreen() {
                 onAppSelected = { app ->
                     isStartMenuOpen = false
                     windowManager.openOrFocus(app.id, app.title) {
-                        app.content()
+                        app.content(isTealBackground, onBackgroundChange)
                     }
                 },
                 onDismiss = { isStartMenuOpen = false },

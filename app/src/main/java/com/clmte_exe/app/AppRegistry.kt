@@ -13,7 +13,7 @@ data class Win98App(
     val title: String,
     val iconRes: Int,
     val type: AppType,
-    val content: @Composable () -> Unit
+    val content: @Composable (isTealBackground: Boolean, onBackgroundChange: (Boolean) -> Unit) -> Unit
 )
 
 val allApps = listOf(
@@ -23,7 +23,7 @@ val allApps = listOf(
         title = "Ford Mustang",
         iconRes = R.drawable.my_documents,
         type = AppType.SYSTEM
-    ) {
+    ) { _, _ ->
         MyDocumentsApp()
     },
 
@@ -32,7 +32,7 @@ val allApps = listOf(
         title = "FAQ",
         iconRes = R.drawable.my_computer,
         type = AppType.SYSTEM
-    ) {
+    ) { _, _ ->
         MyComputerApp()
     },
 
@@ -41,7 +41,7 @@ val allApps = listOf(
         title = "Notepad",
         iconRes = R.drawable.ic_launcher_foreground,
         type = AppType.ACCESSORY
-    ) {
+    ) { _, _ ->
         NotepadApp()
     },
 
@@ -50,7 +50,7 @@ val allApps = listOf(
         title = "Calculator",
         iconRes = R.drawable.ic_launcher_foreground,
         type = AppType.ACCESSORY
-    ) {
+    ) { _, _ ->
         CalculatorApp()
     },
 
@@ -60,7 +60,7 @@ val allApps = listOf(
         title = "Workshop Bin",
         iconRes = R.drawable.empty_rb,
         type = AppType.SYSTEM
-    ) {
+    ) { _, _ ->
         RecycleBinApp()
     },
 
@@ -69,7 +69,7 @@ val allApps = listOf(
         title = "AI Assistant",
         iconRes = R.drawable.ai,
         type = AppType.SYSTEM
-    ) {
+    ) { _, _ ->
         InternetExplorerApp()
     },
 
@@ -78,7 +78,10 @@ val allApps = listOf(
         title = "Settings",
         iconRes = R.drawable.settings,
         type = AppType.SYSTEM
-    ) {
-        SettingsApp()
+    ) { isTealBackground, onBackgroundChange -> // Changing the color the background color
+        SettingsContain(
+            isTealBackground = isTealBackground,
+            onBackgroundChange = onBackgroundChange
+        )
     },
 )

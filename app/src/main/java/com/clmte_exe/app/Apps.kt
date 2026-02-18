@@ -16,18 +16,48 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.material3.Button
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.material3.Text
+import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
 
+
+// The main buttons for the settings app
 @Composable
-fun SettingsApp() {
+fun SettingsApp(
+    accountClick: () -> Unit = {},
+    securityClick: () -> Unit = {},
+    notificationsClick: () -> Unit = {},
+    preferencesClick: () -> Unit = {}
+) {
     Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = "Settings",
-            fontWeight = FontWeight.Bold
-        )
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    )
+    {
+        Spacer(Modifier.height(12.dp))
+        SettingsButton("Account Info", accountClick)
+        SettingsButton("Security", securityClick)
+        SettingsButton("Notifications", notificationsClick)
+        SettingsButton("Preferences", preferencesClick)
+    }
+}
+
+// This is the buttons for the settings app
+@Composable
+fun SettingsButton(
+    text: String,
+    onClick: () -> Unit
+){
+    Button(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        shape = RectangleShape
+    ){
+        Text(text)
     }
 }
 
