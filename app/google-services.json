@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "236252181796",
+    "project_id": "clmte-86701",
+    "storage_bucket": "clmte-86701.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:236252181796:android:85acc75ee8a55132616fb1",
+        "android_client_info": {
+          "package_name": "com.clmte_exe.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyALON6j0x6zGolg8_AFD68sgADNhWtkU3M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

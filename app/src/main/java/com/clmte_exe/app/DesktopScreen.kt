@@ -1,4 +1,5 @@
 package com.clmte_exe.app
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -17,14 +18,35 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.google.firebase.firestore.FirebaseFirestore
 
 
 val desktopApps = allApps.filter { it.type == AppType.SYSTEM }
 val accessories = allApps.filter { it.type == AppType.ACCESSORY }
 
 
+// THIS IS SIMPLY THE TEST FUNCTION TO SEE IF WE ARE CONNECTED TO FIRESTORE
+fun fsDatabaseTestConnection() {
+    val db = FirebaseFirestore.getInstance()
+    val data = hashMapOf(
+        "status" to "Connected",
+        "timestamp" to System.currentTimeMillis()
+    )
+
+    db.collection("ConnectionStatus")
+        .add(data)
+        .addOnSuccessListener { e ->
+            Log.d("FIRESTORE", "Connection was successful!")
+        }
+        .addOnFailureListener { e ->
+            Log.d("FIRESTORE", "There was an error connecting")
+        }
+}
+
+
 @Composable
 fun DesktopScreen() {
+
     val windowManager = remember { WindowManager() }
     var isStartMenuOpen by remember { mutableStateOf(false) }
 
@@ -106,6 +128,8 @@ fun DesktopScreen() {
             Taskbar(
                 onStartClick = {
                     isStartMenuOpen = !isStartMenuOpen
+                    if(isStartMenuOpen){
+                    }
                 },
                 onClockClick = {
                     windowManager.openOrFocus(
