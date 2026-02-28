@@ -26,22 +26,24 @@ val accessories = allApps.filter { it.type == AppType.ACCESSORY }
 
 
 // THIS IS SIMPLY THE TEST FUNCTION TO SEE IF WE ARE CONNECTED TO FIRESTORE
-fun fsDatabaseTestConnection() {
-    val db = FirebaseFirestore.getInstance()
-    val data = hashMapOf(
-        "status" to "Connected",
-        "timestamp" to System.currentTimeMillis()
-    )
+// This is not currently being used, but if connection is in question, use it!
 
-    db.collection("ConnectionStatus")
-        .add(data)
-        .addOnSuccessListener { e ->
-            Log.d("FIRESTORE", "Connection was successful!")
-        }
-        .addOnFailureListener { e ->
-            Log.d("FIRESTORE", "There was an error connecting")
-        }
-}
+//fun fsDatabaseTestConnection() {
+//    val db = FirebaseFirestore.getInstance()
+//    val data = hashMapOf(
+//        "status" to "Connected",
+//        "timestamp" to System.currentTimeMillis()
+//    )
+//
+//    db.collection("ConnectionStatus")
+//        .add(data)
+//        .addOnSuccessListener { e ->
+//            Log.d("FIRESTORE", "Connection was successful!")
+//        }
+//        .addOnFailureListener { e ->
+//            Log.d("FIRESTORE", "There was an error connecting")
+//        }
+//}
 
 
 @Composable
