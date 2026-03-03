@@ -19,13 +19,15 @@ data class Win98App(
 
 val allApps = listOf(
 
+    // Calls the Garage app when clicked.
     Win98App(
         id = "mydocuments",
-        title = "Ford Mustang",
+        title = "Garage",
+        // Gives the app the image of the picture "my_documents"
         iconRes = R.drawable.my_documents,
         type = AppType.SYSTEM
     ) { _, _ ->
-        MyDocumentsApp()
+        Garage()
     },
 
     Win98App(

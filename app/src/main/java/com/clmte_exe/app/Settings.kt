@@ -1,7 +1,7 @@
 package com.clmte_exe.app
 
-import android.media.MediaPlayer
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,17 +16,18 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Slider
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+
 
 // This will be where the settings app is displayed
 @Composable
@@ -52,6 +53,26 @@ fun SettingsContain(
             settings = settings,
             onSettingsChange = onSettingsChange
         )
+    }
+}
+
+@Composable
+fun SettingsApp(
+    accountClick: () -> Unit,
+    securityClick: () -> Unit,
+    notificationsClick: () -> Unit,
+    preferencesClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier.fillMaxSize().padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text("Settings", fontWeight = FontWeight.Bold)
+        Spacer(Modifier.height(8.dp))
+        Button(onClick = accountClick, modifier = Modifier.fillMaxWidth()) { Text("Account") }
+        Button(onClick = securityClick, modifier = Modifier.fillMaxWidth()) { Text("Security") }
+        Button(onClick = notificationsClick, modifier = Modifier.fillMaxWidth()) { Text("Notifications") }
+        Button(onClick = preferencesClick, modifier = Modifier.fillMaxWidth()) { Text("Preferences") }
     }
 }
 
@@ -119,8 +140,6 @@ fun PreferencesScreen(
     onSettingsChange: (AppSettingClass) -> Unit,
 ){
 
-    var fontsize by remember { mutableStateOf(16f) }
-
     Column(
         modifier = Modifier.fillMaxSize().padding(16.dp)
     ) {
@@ -156,25 +175,31 @@ fun PreferencesScreen(
             Row(
                 modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
                 horizontalArrangement = Arrangement.SpaceBetween){
-                Row{
-                    Box(
-                        modifier = Modifier
-                            .size(24.dp)
-                            .background(colorval)
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text(name)
-                }
-
-                // Radio button for all the colors in the JSON file.
-                RadioButton(
-                    selected = settings.backgroundColor == name,
-                    onClick ={
-                        onSettingsChange(
-                            settings.copy(backgroundColor = name)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp)
+                        .clickable { 
+                            onSettingsChange(settings.copy(backgroundColor = name))
+                        },
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically // Keeps things aligned
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(24.dp)
+                                .background(colorval)
                         )
+                        Spacer(Modifier.width(8.dp))
+                        Text(name)
                     }
-                )
+
+                    RadioButton(
+                        selected = (settings.backgroundColor == name),
+                        onClick = null // Set to null because the Row handles the click
+                    )
+                }
             }
         }
 
@@ -194,6 +219,22 @@ fun PreferencesScreen(
         )
 
         Spacer(Modifier.height(12.dp))
+
+        // Changing the Unit to miles to kilometers
+        Text("Unit Changer")
+
+        // formula to convert miles to kilometers
+        // val kilometers =  * 1.609
+        // val miles = kilometers * 0.621
+        /*
+            Switch(
+                checked = miles,
+                onCheckedChange = {
+                    checked = kilometers
+            }
+        )
+
+        */
 
         // Notifications
         /*Row(
