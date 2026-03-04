@@ -7,9 +7,7 @@ class FirestoreManager {
 
     val db = FirebaseFirestore.getInstance()
 
-    suspend inline fun <reified T> getAllDocuments(
-        collection: String
-    ): List<T> {
+    suspend inline fun <reified T> getAllDocuments(collection: String): List<T> {
 
         val snapshot = db.collection(collection)
             .get()
@@ -20,10 +18,7 @@ class FirestoreManager {
         }
     }
 
-    suspend inline fun <reified T> getDocument(
-        collection: String,
-        documentId: String
-    ): T? {
+    suspend inline fun <reified T> getDocument(collection: String, documentId: String): T? {
 
         val snapshot = db.collection(collection)
             .document(documentId)
@@ -33,21 +28,14 @@ class FirestoreManager {
         return snapshot.toObject(T::class.java)
     }
 
-    suspend fun <T> saveDocument(
-        collection: String,
-        documentId: String,
-        data: T
-    ) {
+    suspend fun <T> saveDocument(collection: String, documentId: String, data: T) {
         db.collection(collection)
             .document(documentId)
             .set(data!!)
             .await()
     }
 
-    suspend fun deleteDocument(
-        collection: String,
-        documentId: String
-    ) {
+    suspend fun deleteDocument(collection: String, documentId: String) {
         db.collection(collection)
             .document(documentId)
             .delete()
