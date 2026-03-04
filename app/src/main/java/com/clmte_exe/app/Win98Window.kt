@@ -33,12 +33,12 @@ fun Win98Window(
         val screenWidth = maxWidth
         val screenHeight = maxHeight
 
-        val windowWidth = screenWidth * window.widthFraction
-        val windowHeight = screenHeight * window.heightFraction
+        val windowWidth = if (window.isMaximized) screenWidth else screenWidth * window.widthFraction
+        val windowHeight = if (window.isMaximized) screenHeight else screenHeight * window.heightFraction
 
         val density = LocalDensity.current
 
-        if (window.position == Offset.Zero) {
+        if (window.position == Offset.Zero && !window.isMaximized) {
             window.position = with(density) {
                 Offset(
                     ((screenWidth - windowWidth) / 2).toPx(),
@@ -46,14 +46,19 @@ fun Win98Window(
                 )
             }
         }
+
+        val offset = if (window.isMaximized) {
+            IntOffset.Zero
+        } else {
+            IntOffset(
+                window.position.x.toInt(),
+                window.position.y.toInt()
+            )
+        }
+
         Box(
             modifier = Modifier
-                .offset {
-                    IntOffset(
-                        window.position.x.toInt(),
-                        window.position.y.toInt()
-                    )
-                }
+                .offset { offset }
                 .width(windowWidth)
                 .height(windowHeight)
                 .zIndex(window.zIndex)
@@ -62,6 +67,10 @@ fun Win98Window(
             Win98WindowContent(
                 title = window.title,
                 onClose = onClose,
+                onMaximize = {
+                    onFocus()
+                    window.isMaximized = !window.isMaximized
+                },
                 content = window.content
             )
         }
@@ -75,18 +84,23 @@ private val TITLE_BAR_HEIGHT = 28.dp
 fun Win98WindowContent(
     title: String,
     onClose: () -> Unit,
+    onMaximize: () -> Unit,
     content: @Composable () -> Unit
 ) {
+    val isDark = ThemeManager.isDarkMode
+    val windowBg = if (isDark) Color(0xFF3A3A3A) else Color(0xFFC0C0C0)
+    val titleBarBg = if (isDark) Color(0xFF1A1A5C) else Color(0xFF000080)
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFC0C0C0))
+            .background(windowBg)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(TITLE_BAR_HEIGHT)
-                .background(Color(0xFF000080))
+                .height(28.dp)
+                .background(titleBarBg)
                 .padding(horizontal = 6.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -105,7 +119,7 @@ fun Win98WindowContent(
                 ) {
                     Image(
                         painter = painterResource(R.drawable.minimize),
-                        contentDescription = "close",
+                        contentDescription = "minimize",
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.height(18.dp)
                     )
@@ -113,11 +127,12 @@ fun Win98WindowContent(
 
                 Box(
                     modifier = Modifier
+                        .clickable { onMaximize() }
                         .padding(horizontal = 4.dp, vertical = 2.dp)
                 ) {
                     Image(
                         painter = painterResource(R.drawable.maximize),
-                        contentDescription = "close",
+                        contentDescription = "maximize",
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.height(18.dp)
                     )
@@ -141,8 +156,7 @@ fun Win98WindowContent(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.White)
-                .padding(8.dp)
+                .background(windowBg)
         ) {
             content()
         }

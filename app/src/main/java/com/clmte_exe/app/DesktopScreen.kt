@@ -1,6 +1,6 @@
 package com.clmte_exe.app
-import android.util.Log
 import androidx.activity.compose.BackHandler
+import androidx.compose.material3.Scaffold
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,39 +16,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.google.firebase.firestore.FirebaseFirestore
+import com.clmte_exe.app.ThemeManager
 
 
 val desktopApps = allApps.filter { it.type == AppType.SYSTEM }
 val accessories = allApps.filter { it.type == AppType.ACCESSORY }
 
 
-// THIS IS SIMPLY THE TEST FUNCTION TO SEE IF WE ARE CONNECTED TO FIRESTORE
-// This is not currently being used, but if connection is in question, use it!
-
-//fun fsDatabaseTestConnection() {
-//    val db = FirebaseFirestore.getInstance()
-//    val data = hashMapOf(
-//        "status" to "Connected",
-//        "timestamp" to System.currentTimeMillis()
-//    )
-//
-//    db.collection("ConnectionStatus")
-//        .add(data)
-//        .addOnSuccessListener { e ->
-//            Log.d("FIRESTORE", "Connection was successful!")
-//        }
-//        .addOnFailureListener { e ->
-//            Log.d("FIRESTORE", "There was an error connecting")
-//        }
-//}
-
-
 @Composable
 fun DesktopScreen() {
-
     val windowManager = remember { WindowManager() }
     var isStartMenuOpen by remember { mutableStateOf(false) }
 
@@ -71,67 +48,12 @@ fun DesktopScreen() {
 
 
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(top = 42.dp)
-            .background(Color(0xFF008080))
-    ) {
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(3),
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp),
-            horizontalArrangement = Arrangement.spacedBy(24.dp)
-        ) {
-            items(desktopApps) { app ->
-                DesktopIcon(
-                    app = DesktopApp(
-                        id = app.id,
-                        title = app.title,
-                        iconRes = app.iconRes
-                    )
-                ) {
-                    windowManager.openOrFocus(app.id, app.title) {
-                        app.content()
-                    }
-                }
-            }
-        }
-
-        windowManager.windows.forEach { window ->
-            Win98Window(
-                window = window,
-                onClose = { windowManager.close(window) },
-                onFocus = { windowManager.bringToFront(window) }
-            )
-        }
-
-        if (isStartMenuOpen) {
-            StartMenu(
-                accessories = accessories,
-                onAppSelected = { app ->
-                    isStartMenuOpen = false
-                    windowManager.openOrFocus(app.id, app.title) {
-                        app.content()
-                    }
-                },
-                onDismiss = { isStartMenuOpen = false },
-                onShutdown = {
-                    isStartMenuOpen = false
-                }
-            )
-        }
-
-
-
-        Box(
-            modifier = Modifier.align(Alignment.BottomCenter)
-        ) {
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        bottomBar = {
             Taskbar(
                 onStartClick = {
                     isStartMenuOpen = !isStartMenuOpen
-                    if(isStartMenuOpen){
-                    }
                 },
                 onClockClick = {
                     windowManager.openOrFocus(
@@ -143,7 +65,59 @@ fun DesktopScreen() {
                 }
             )
         }
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .background(ThemeManager.desktopBackground)
+        ) {
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(3),
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(24.dp),
+                horizontalArrangement = Arrangement.spacedBy(24.dp)
+            ) {
+                items(desktopApps) { app ->
+                    DesktopIcon(
+                        app = DesktopApp(
+                            id = app.id,
+                            title = app.title,
+                            iconRes = app.iconRes
+                        )
+                    ) {
+                        windowManager.openOrFocus(app.id, app.title) {
+                            app.content()
+                        }
+                    }
+                }
+            }
 
+            windowManager.windows.forEach { window ->
+                Win98Window(
+                    window = window,
+                    onClose = { windowManager.close(window) },
+                    onFocus = { windowManager.bringToFront(window) }
+                )
+            }
 
+            if (isStartMenuOpen) {
+                Box(modifier = Modifier.align(Alignment.BottomStart)) {
+                    StartMenu(
+                        accessories = accessories,
+                        onAppSelected = { app ->
+                            isStartMenuOpen = false
+                            windowManager.openOrFocus(app.id, app.title) {
+                                app.content()
+                            }
+                        },
+                        onDismiss = { isStartMenuOpen = false },
+                        onShutdown = {
+                            isStartMenuOpen = false
+                        }
+                    )
+                }
+            }
+        }
     }
 }

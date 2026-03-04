@@ -1,12 +1,15 @@
 package com.clmte_exe.app
 
 import androidx.compose.runtime.Composable
+import com.clmte_exe.app.todo.TodoApp
 
 enum class AppType {
     SYSTEM,
     ACCESSORY,
     USER
 }
+
+
 
 data class Win98App(
     val id: String,
@@ -20,16 +23,16 @@ val allApps = listOf(
 
     Win98App(
         id = "mydocuments",
-        title = "Ford Mustang",
-        iconRes = R.drawable.my_documents,
+        title = "My Garage",
+        iconRes = R.drawable.garage,
         type = AppType.SYSTEM
     ) {
-        MyDocumentsApp()
+        MyGarageApp()
     },
 
     Win98App(
         id = "mycomputer",
-        title = "FAQ",
+        title = "My Computer",
         iconRes = R.drawable.my_computer,
         type = AppType.SYSTEM
     ) {
@@ -39,7 +42,7 @@ val allApps = listOf(
     Win98App(
         id = "notepad",
         title = "Notepad",
-        iconRes = R.drawable.ic_launcher_foreground,
+        iconRes = R.drawable.ic_notepad,
         type = AppType.ACCESSORY
     ) {
         NotepadApp()
@@ -48,7 +51,7 @@ val allApps = listOf(
     Win98App(
         id = "calculator",
         title = "Calculator",
-        iconRes = R.drawable.ic_launcher_foreground,
+        iconRes = R.drawable.ic_calculator,
         type = AppType.ACCESSORY
     ) {
         CalculatorApp()
@@ -80,5 +83,14 @@ val allApps = listOf(
         type = AppType.SYSTEM
     ) {
         SettingsApp()
+    },
+
+    Win98App(
+        id = "todo",
+        title = "MyWork",
+        iconRes = R.drawable.todo,
+        type = AppType.SYSTEM
+    ) {
+        TodoApp()
     },
 )

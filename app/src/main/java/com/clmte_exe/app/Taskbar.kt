@@ -22,48 +22,46 @@ fun Taskbar(
     onClockClick: () -> Unit
 ) {
     val time = rememberTime()
+    val taskbarBg = ThemeManager.taskbarBackground
+    val textColor = if (ThemeManager.isDarkMode) Color.White else Color.Black
 
-    // The Box provides the background that extends behind the navigation bar
-    Box(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color(0xFFBFBFBF))
-            .navigationBarsPadding() // This pushes the Row above the navigation bar
+            .background(taskbarBg)
+            .navigationBarsPadding()
+            .height(48.dp)
+            .padding(horizontal = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Row(
+
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(40.dp)
-                .padding(horizontal = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .clickable { onStartClick() }
+                .padding(horizontal = 4.dp, vertical = 2.dp)
         ) {
-
-            Box(
-                modifier = Modifier
-                    .clickable { onStartClick() }
-                    .padding(horizontal = 4.dp, vertical = 2.dp)
-            ) {
-                Image(
-                    painter = painterResource(R.drawable.start_button),
-                    contentDescription = "Start",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.height(32.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            Box(
-                modifier = Modifier
-                    .clickable { onClockClick() }
-                    .padding(horizontal = 8.dp)
-            ) {
-                Text(
-                    text = time,
-                    fontWeight = FontWeight.Medium
-                )
-            }
+            Image(
+                painter = painterResource(R.drawable.start_button),
+                contentDescription = "Start",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.height(32.dp)
+            )
         }
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        Box(
+            modifier = Modifier
+                .clickable { onClockClick() }
+                .padding(horizontal = 8.dp)
+        ) {
+            Text(
+                text = time,
+                fontWeight = FontWeight.Medium,
+                color = textColor
+            )
+        }
+
     }
 }
 

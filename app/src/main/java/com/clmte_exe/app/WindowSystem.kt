@@ -1,17 +1,25 @@
 package com.clmte_exe.app
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.runtime.Composable
 
-data class WindowState(
+class WindowState(
     val id: String,
     val title: String,
     val content: @Composable () -> Unit,
     val widthFraction: Float = 0.85f,
     val heightFraction: Float = 0.7f,
-    var position: Offset = Offset.Zero,
-    var zIndex: Float = 0f
-)
+    initialPosition: Offset = Offset.Zero,
+    initialZIndex: Float = 0f,
+    initialMaximized: Boolean = false
+) {
+    var position by mutableStateOf(initialPosition)
+    var zIndex by mutableStateOf(initialZIndex)
+    var isMaximized by mutableStateOf(initialMaximized)
+}
 
 class WindowManager {
     private var counter = 0f
@@ -48,7 +56,7 @@ class WindowManager {
                     content = content,
                     widthFraction = widthFraction,
                     heightFraction = heightFraction,
-                    zIndex = counter++
+                    initialZIndex = counter++
                 )
             )
         }

@@ -11,6 +11,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.draw.rotate
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
+import com.clmte_exe.app.mygarage.Win98Blue
+import com.clmte_exe.app.mygarage.Win98Gray
+import com.clmte_exe.app.mygarage.Win98Black
 
 @Composable
 fun StartMenu(
@@ -27,25 +33,29 @@ fun StartMenu(
         Row(
             modifier = Modifier
                 .align(Alignment.BottomStart)
-                .padding(bottom = 40.dp)
                 .width(240.dp)
                 .height(300.dp)
-                .background(Color(0xFFC0C0C0))
+                .background(Win98Gray)
         ) {
             // Left blue strip
             Box(
                 modifier = Modifier
                     .width(36.dp)
                     .fillMaxHeight()
-                    .background(Color(0xFF000080)),
-                contentAlignment = Alignment.BottomCenter
+                    .background(Win98Blue),
+                contentAlignment = Alignment.BottomCenter,
             ) {
                 Text(
-                    text = "Windows",
+                    text = "Windows 98",
                     color = Color.White,
-                    fontSize = 12.sp,
+                    fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(bottom = 8.dp)
+                    maxLines = 1,
+                    softWrap = false,
+                    modifier = Modifier
+                        .rotate(270f)
+                        .wrapContentSize(unbounded = true)
+                        .padding(start = 100.dp, bottom = 6.dp),
                 )
             }
 
@@ -57,31 +67,36 @@ fun StartMenu(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 accessories.forEach { app ->
-                    StartMenuItem(app.title) {
-                        onAppSelected(app)
-                    }
+                    StartMenuItem(
+                        text = app.title,
+                        iconRes = app.iconRes,
+                        onClick = { onAppSelected(app) }
+                    )
                 }
             }
         }
     }
 }
 
-
 @Composable
 private fun StartMenuItem(
     text: String,
+    iconRes: Int,
     onClick: () -> Unit
 ) {
-    Box(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() }
-            .padding(vertical = 6.dp, horizontal = 8.dp)
+            .padding(vertical = 6.dp, horizontal = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = text,
-            fontSize = 14.sp,
-            color = Color.Black
+        Image(
+            painter = painterResource(id = iconRes),
+            contentDescription = null,
+            modifier = Modifier.size(32.dp)
         )
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(text = text, fontSize = 14.sp, color = Win98Black)
     }
 }

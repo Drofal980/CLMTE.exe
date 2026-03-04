@@ -28,7 +28,7 @@ fun DesktopIcon(
         Image(
             painter = painterResource(app.iconRes),
             contentDescription = app.title,
-            modifier = Modifier.size(48.dp)
+            modifier = Modifier.size(98.dp)
         )
         Spacer(Modifier.height(6.dp))
         Text(

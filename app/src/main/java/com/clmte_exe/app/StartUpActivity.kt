@@ -6,10 +6,10 @@ import android.util.Log
 import android.view.View
 import android.content.Intent
 import android.widget.*
-import androidx.appcompat.app.AppCompatActivity
-import com.google.firebase.Firebase
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.firestore
+//import androidx.appcompat.app.AppCompatActivity
+//import com.google.firebase.Firebase
+//import com.google.firebase.firestore.FirebaseFirestore
+//import com.google.firebase.firestore.firestore
 
 class StartUpActivity: ComponentActivity() {
 
