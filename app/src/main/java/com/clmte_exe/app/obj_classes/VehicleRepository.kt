@@ -1,6 +1,6 @@
-package com.clmte_exe.app
+package com.clmte_exe.app.obj_classes
 
-import com.google.firebase.firestore.FirebaseFirestore
+import com.clmte_exe.app.api_calls.FirestoreManager
 
 class VehicleRepository(
     private val firestore: FirestoreManager = FirestoreManager()
@@ -15,7 +15,7 @@ class VehicleRepository(
     }
 
     suspend fun saveVehicle(vehicle: Vehicle) {
-        val id = vehicle.id ?: throw IllegalArgumentException("Vehicle must have an id")
+        val id = vehicle.getId() ?: throw IllegalArgumentException("Vehicle must have an id")
         firestore.saveDocument("vehicles", id, vehicle)
     }
 

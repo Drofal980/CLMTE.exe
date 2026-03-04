@@ -1,4 +1,4 @@
-package com.clmte_exe.app
+package com.clmte_exe.app.api_calls
 
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
