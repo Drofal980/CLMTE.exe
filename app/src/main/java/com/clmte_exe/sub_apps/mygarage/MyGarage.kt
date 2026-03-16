@@ -105,7 +105,7 @@ fun MyGarageApp(garageViewModel: GarageViewModel = viewModel()) {
                                             dropPosition.x - trashCenter.x,
                                             dropPosition.y - trashCenter.y
                                         )
-                                        if (distance < 48f) {
+                                        if (distance > 100f) {
                                             garageViewModel.deleteCar(car)
                                         }
                                     }

@@ -1,7 +1,10 @@
 package com.clmte_exe.app.mygarage
 
+import com.google.firebase.firestore.DocumentId
+
 // Created a data class so it's easy for database structure
 data class Vehicle(
+    @DocumentId val id: String = "",
     val nickname: String = "",
     val odometer: Int = 0,
     val vehicle_type: String = "",
