@@ -29,9 +29,14 @@ class GarageViewModel : ViewModel() {
             )
         }
 
-        val type = CarType.valueOf(vehicle.vehicle_type.uppercase())
+        val type = try {
+            CarType.valueOf(vehicle.vehicle_type.uppercase())
+        } catch (e: Exception) {
+            CarType.SEDAN
+        }
+        
         // Existing local UI logic
-        val template = carTemplates[type] ?: return
+        val template = carTemplates[type] ?: carTemplates[CarType.SEDAN]!!
 
         val car = GarageCar(
             id = vehicleId,
@@ -91,7 +96,8 @@ class GarageViewModel : ViewModel() {
 
                 val template = carTemplates[type] ?: carTemplates[CarType.SEDAN]!!
 
-                val vehicleId = vehicle.vin_number?.takeIf { it.isNotBlank() } ?: UUID.randomUUID().toString()
+                // Use the firestore document ID if available
+                val vehicleId = if (vehicle.id.isNotBlank()) vehicle.id else (vehicle.vin_number?.takeIf { it.isNotBlank() } ?: UUID.randomUUID().toString())
 
                 cars.add(
                     GarageCar(
