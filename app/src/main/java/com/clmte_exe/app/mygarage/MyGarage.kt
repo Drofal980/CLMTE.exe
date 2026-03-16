@@ -29,6 +29,11 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.clmte_exe.app.R
 import com.clmte_exe.app.ThemeManager
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.onGloballyPositioned
 
 data class GarageCar(
     val id: String,
@@ -55,9 +60,17 @@ data class CarComponentInfo(val label: String, val info: String, val iconRes: In
 
 @Composable
 fun MyGarageApp(garageViewModel: GarageViewModel = viewModel()) {
+
+    // This will add the existing cars that are in firebase
+    LaunchedEffect(Unit) {
+        garageViewModel.loadCars()
+    }
+
     var currentNav by remember { mutableStateOf(GarageNav.LIST) }
     var selectedCar by remember { mutableStateOf<GarageCar?>(null) }
     var selectedComponent by remember { mutableStateOf<CarComponentInfo?>(null) }
+
+    var trashPosition by remember { mutableStateOf<Offset?>(null) }
 
     when (currentNav) {
         GarageNav.LIST -> {
@@ -84,7 +97,23 @@ fun MyGarageApp(garageViewModel: GarageViewModel = viewModel()) {
                                 onCardClick = {
                                     selectedCar = car
                                     currentNav = GarageNav.CAR_DETAILS
+                                },
+                                onDelete = {
+                                    garageViewModel.deleteCar(it)
+                                },
+                                onDrop = { dropPosition ->
+                                    trashPosition?.let { trash ->
+                                        val trashCenter = trash + Offset(24f, 24f)
+                                        val distance = kotlin.math.hypot(
+                                            dropPosition.x - trashCenter.x,
+                                            dropPosition.y - trashCenter.y
+                                        )
+                                        if (distance < 48f) {
+                                            garageViewModel.deleteCar(car)
+                                        }
+                                    }
                                 }
+
                             )
                         }
                         item { Spacer(modifier = Modifier.height(72.dp)) }
@@ -96,14 +125,33 @@ fun MyGarageApp(garageViewModel: GarageViewModel = viewModel()) {
                 ) {
                     Win98FabButton(onClick = { currentNav = GarageNav.ADD_CAR })
                 }
+
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                        .padding(20.dp)
+                        .size(48.dp)
+                        .background(Win98Gray)
+                        .win98Border(false)
+                        .onGloballyPositioned { coordinates ->
+                            trashPosition = coordinates.localToRoot(Offset.Zero)
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.trash),
+                        contentDescription = "Trash",
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
             }
         }
 
         GarageNav.ADD_CAR -> {
             BackHandler { currentNav = GarageNav.LIST }
             AddCarScreen(
-                onSave = { type, nickname, modelYear, notes ->
-                    garageViewModel.addCar(type, nickname, modelYear, notes)
+                onSave = { vehicle ->
+                    garageViewModel.addCar(vehicle)
                     currentNav = GarageNav.LIST
                 },
                 onCancel = { currentNav = GarageNav.LIST }
@@ -162,11 +210,39 @@ fun Win98FabButton(onClick: () -> Unit) {
 @Composable
 fun GarageCarCard(
     car: GarageCar,
-    onCardClick: () -> Unit
+    onCardClick: () -> Unit,
+    onDelete: (GarageCar) -> Unit,
+    onDrop: (Offset) -> Unit
 ) {
+    // to be able to drag and drop
+    var offsetX by remember { mutableStateOf(0f) }
+    var offsetY by remember { mutableStateOf(0f) }
+
+    // Card position
+    val cardPosition = remember { mutableStateOf(Offset.Zero) }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .offset { IntOffset(offsetX.toInt(), offsetY.toInt()) }
+            .onGloballyPositioned { coordinates ->
+                cardPosition.value = coordinates.localToRoot(Offset.Zero)}
+            .pointerInput(Unit){
+                detectDragGestures (
+                    onDragEnd = {
+                        // reset card position after grabbed
+                        val dropPosition = cardPosition.value + Offset(offsetX, offsetY)
+                        onDrop(dropPosition)
+                        offsetX = 0f
+                        offsetY = 0f
+                    },
+                    onDrag = { change, dragAmount ->
+                        change.consume()
+                        offsetX += dragAmount.x
+                        offsetY += dragAmount.y
+                    }
+                )
+            }
             .background(Win98Gray)
             .win98Border(pressed = false)
             .padding(3.dp)

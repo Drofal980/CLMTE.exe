@@ -26,12 +26,20 @@ import com.clmte_exe.app.R
 
 @Composable
 fun AddCarScreen(
-    onSave: (CarType, String, String, String) -> Unit,
+    onSave: (Vehicle) -> Unit,
     onCancel: () -> Unit
 ) {
+
+    // These are what the user will input
     var selectedType by remember { mutableStateOf<CarType?>(null) }
     var nickname by remember { mutableStateOf("") }
-    var modelYear by remember { mutableStateOf("") }
+    var make by remember { mutableStateOf("") }
+    var model by remember { mutableStateOf("") }
+    var year by remember { mutableStateOf("") }
+    var vin by remember { mutableStateOf("") }
+    var driveType by remember { mutableStateOf("") }
+    var transmission by remember { mutableStateOf("") }
+    var odometer by remember { mutableStateOf("") }
     var notes by remember { mutableStateOf("") }
 
     Column(
@@ -54,7 +62,7 @@ fun AddCarScreen(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            CarType.entries.forEach { type ->
+            CarType.values().forEach { type ->
                 val isSelected = selectedType == type
                 val interactionSource = remember { MutableInteractionSource() }
                 val isPressed by interactionSource.collectIsPressedAsState()
@@ -130,12 +138,60 @@ fun AddCarScreen(
         Win98TextField(value = nickname, onValueChange = { nickname = it }, placeholder = "e.g. Car 1")
 
         Text(
-            text = "Model / Year (optional):",
+            text = "Year: ",
             fontWeight = FontWeight.Bold,
             fontSize = 14.sp,
             color = Win98Black
         )
-        Win98TextField(value = modelYear, onValueChange = { modelYear = it }, placeholder = "e.g. 2020 Ford Mustang")
+        Win98TextField(value = year, onValueChange = { year = it }, placeholder = "e.g. 2020")
+
+        Text(
+            text = "Make: ",
+            fontWeight = FontWeight.Bold,
+            fontSize = 14.sp,
+            color = Win98Black
+        )
+        Win98TextField(value = make, onValueChange = { make = it }, placeholder = "e.g. Ford")
+
+        Text(
+            text = "Model: ",
+            fontWeight = FontWeight.Bold,
+            fontSize = 14.sp,
+            color = Win98Black
+        )
+        Win98TextField(value = model, onValueChange = { model = it }, placeholder = "e.g. Mustang")
+
+        Text(
+            text = "Odometer: ",
+            fontWeight = FontWeight.Bold,
+            fontSize = 14.sp,
+            color = Win98Black
+        )
+        Win98TextField(value = odometer, onValueChange = { odometer = it }, placeholder = "e.g. 45000")
+
+        Text(
+            text = "VIN: ",
+            fontWeight = FontWeight.Bold,
+            fontSize = 14.sp,
+            color = Win98Black
+        )
+        Win98TextField(value = vin, onValueChange = { vin = it }, placeholder = "Vehicle Identification Number")
+
+        Text(
+            text = "Drive Type: ",
+            fontWeight = FontWeight.Bold,
+            fontSize = 14.sp,
+            color = Win98Black
+        )
+        Win98TextField(value = driveType, onValueChange = { driveType = it }, placeholder = "FWD / AWD / RWD")
+
+        Text(
+            text = "Transmission: ",
+            fontWeight = FontWeight.Bold,
+            fontSize = 14.sp,
+            color = Win98Black
+        )
+        Win98TextField(value = transmission, onValueChange = { transmission = it }, placeholder = "Automatic / Manual")
 
         Text(
             text = "Notes (optional):",
@@ -163,9 +219,19 @@ fun AddCarScreen(
                 text = "Save",
                 enabled = selectedType != null && nickname.isNotBlank(),
                 onClick = {
-                    selectedType?.let { type ->
-                        onSave(type, nickname, modelYear, notes)
-                    }
+                    val vehicle = Vehicle(
+                        nickname = nickname,
+                        odometer = odometer.toIntOrNull() ?: 0,
+                        vehicle_type = selectedType!!.label,
+                        make = make,
+                        model = model,
+                        year = year.toIntOrNull() ?: 0,
+                        vin_number = vin,
+                        drive_type = driveType,
+                        transmission = transmission,
+                        notes = if (notes.isBlank()) emptyList() else listOf(notes)
+                    )
+                    onSave(vehicle)
                 }
             )
         }
