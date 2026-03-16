@@ -1,4 +1,4 @@
-package com.clmte_exe.app
+package com.clmte_exe.sub_apps
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
@@ -21,11 +21,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.TextUnit
-import com.clmte_exe.app.mygarage.Win98Black
-import com.clmte_exe.app.mygarage.Win98Blue
-import com.clmte_exe.app.mygarage.Win98Gray
-import com.clmte_exe.app.mygarage.win98Border
-import com.clmte_exe.app.mygarage.MyGarageApp as GarageApp
+import com.clmte_exe.sub_apps.settings.ThemeManager
+import com.clmte_exe.sub_apps.mygarage.Win98Black
+import com.clmte_exe.sub_apps.mygarage.Win98Blue
+import com.clmte_exe.sub_apps.mygarage.Win98Gray
+import com.clmte_exe.sub_apps.mygarage.win98Border
+import com.clmte_exe.sub_apps.mygarage.MyGarageApp as GarageApp
 
 private val appBg: Color get() = if (ThemeManager.isDarkMode) Color(0xFF2D2D2D) else Color(0xFFC0C0C0)
 private val appText: Color get() = if (ThemeManager.isDarkMode) Color.White else Color.Black

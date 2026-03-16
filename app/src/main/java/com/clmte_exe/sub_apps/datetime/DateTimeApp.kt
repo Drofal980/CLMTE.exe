@@ -1,4 +1,4 @@
-package com.clmte_exe.app
+package com.clmte_exe.sub_apps.datetime
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Text
@@ -11,7 +11,6 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.*
-
 @Composable
 fun DateTimeApp() {
     var time by remember { mutableStateOf("") }

@@ -1,4 +1,4 @@
-package com.clmte_exe.app
+package com.clmte_exe.app.ui
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
@@ -19,6 +19,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.sp
+import com.clmte_exe.app.R
+import com.clmte_exe.sub_apps.settings.ThemeManager
 
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable

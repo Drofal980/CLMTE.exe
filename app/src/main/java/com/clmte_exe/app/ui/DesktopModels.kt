@@ -1,4 +1,4 @@
-package com.clmte_exe.app
+package com.clmte_exe.app.ui
 
 data class DesktopApp(
     val id: String,

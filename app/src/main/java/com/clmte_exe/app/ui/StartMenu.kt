@@ -1,4 +1,4 @@
-package com.clmte_exe.app
+package com.clmte_exe.app.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -14,9 +14,10 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.draw.rotate
 import androidx.compose.foundation.Image
 import androidx.compose.ui.res.painterResource
-import com.clmte_exe.app.mygarage.Win98Blue
-import com.clmte_exe.app.mygarage.Win98Gray
-import com.clmte_exe.app.mygarage.Win98Black
+import com.clmte_exe.sub_apps.Win98App
+import com.clmte_exe.sub_apps.mygarage.Win98Blue
+import com.clmte_exe.sub_apps.mygarage.Win98Gray
+import com.clmte_exe.sub_apps.mygarage.Win98Black
 
 @Composable
 fun StartMenu(
