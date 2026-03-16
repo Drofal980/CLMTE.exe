@@ -7,7 +7,6 @@ import com.clmte_exe.app.R
 import com.clmte_exe.app.api_calls.FirestoreManager
 import kotlinx.coroutines.launch
 import java.util.UUID
-import com.clmte_exe.app.mygarage.Vehicle
 
 class GarageViewModel : ViewModel() {
     val cars = mutableStateListOf<GarageCar>()
