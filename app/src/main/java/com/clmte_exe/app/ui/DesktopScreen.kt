@@ -25,6 +25,7 @@ import com.clmte_exe.sub_apps.allApps
 
 val desktopApps = allApps.filter { it.type == AppType.SYSTEM }
 val accessories = allApps.filter { it.type == AppType.ACCESSORY }
+val startMenuItems = allApps.filter { it.id in listOf("mydocuments", "settings", "todo") }
 
 
 @Composable
@@ -108,6 +109,7 @@ fun DesktopScreen() {
                 Box(modifier = Modifier.align(Alignment.BottomStart)) {
                     StartMenu(
                         accessories = accessories,
+                        mainItems = startMenuItems,
                         onAppSelected = { app ->
                             isStartMenuOpen = false
                             windowManager.openOrFocus(app.id, app.title) {
@@ -115,9 +117,6 @@ fun DesktopScreen() {
                             }
                         },
                         onDismiss = { isStartMenuOpen = false },
-                        onShutdown = {
-                            isStartMenuOpen = false
-                        }
                     )
                 }
             }

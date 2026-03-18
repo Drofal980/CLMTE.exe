@@ -27,21 +27,26 @@ import com.clmte_exe.app.R
 
 @Composable
 fun AddCarScreen(
+    initialVehicle: Vehicle? = null,
     onSave: (Vehicle) -> Unit,
     onCancel: () -> Unit
 ) {
 
     // These are what the user will input
-    var selectedType by remember { mutableStateOf<CarType?>(null) }
-    var nickname by remember { mutableStateOf("") }
-    var make by remember { mutableStateOf("") }
-    var model by remember { mutableStateOf("") }
-    var year by remember { mutableStateOf("") }
-    var vin by remember { mutableStateOf("") }
-    var driveType by remember { mutableStateOf("") }
-    var transmission by remember { mutableStateOf("") }
-    var odometer by remember { mutableStateOf("") }
-    var notes by remember { mutableStateOf("") }
+    var selectedType by remember { mutableStateOf<CarType?>(
+        initialVehicle?.vehicle_type?.let { typeLabel ->
+            CarType.entries.find { it.label.equals(typeLabel, ignoreCase = true) }
+        }
+    ) }
+    var nickname by remember { mutableStateOf(initialVehicle?.nickname ?: "") }
+    var make by remember { mutableStateOf(initialVehicle?.make ?: "") }
+    var model by remember { mutableStateOf(initialVehicle?.model ?: "") }
+    var year by remember { mutableStateOf(initialVehicle?.year?.takeIf { it != 0 }?.toString() ?: "") }
+    var vin by remember { mutableStateOf(initialVehicle?.vin_number ?: "") }
+    var driveType by remember { mutableStateOf(initialVehicle?.drive_type ?: "FWD") }
+    var transmission by remember { mutableStateOf(initialVehicle?.transmission ?: "Automatic") }
+    var odometer by remember { mutableStateOf(initialVehicle?.odometer?.takeIf { it != 0 }?.toString() ?: "") }
+    var notes by remember { mutableStateOf(initialVehicle?.notes?.joinToString("\n") ?: "") }
 
     Column(
         modifier = Modifier
@@ -63,7 +68,7 @@ fun AddCarScreen(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            CarType.values().forEach { type ->
+            CarType.entries.forEach { type ->
                 val isSelected = selectedType == type
                 val interactionSource = remember { MutableInteractionSource() }
                 val isPressed by interactionSource.collectIsPressedAsState()
@@ -184,7 +189,11 @@ fun AddCarScreen(
             fontSize = 14.sp,
             color = Win98Black
         )
-        Win98TextField(value = driveType, onValueChange = { driveType = it }, placeholder = "FWD / AWD / RWD")
+        Win98ChoiceRow(
+            options = listOf("FWD", "RWD", "AWD", "4WD"),
+            selectedOption = driveType,
+            onOptionSelected = { driveType = it }
+        )
 
         Text(
             text = "Transmission: ",
@@ -192,7 +201,11 @@ fun AddCarScreen(
             fontSize = 14.sp,
             color = Win98Black
         )
-        Win98TextField(value = transmission, onValueChange = { transmission = it }, placeholder = "Automatic / Manual")
+        Win98ChoiceRow(
+            options = listOf("Automatic", "Manual"),
+            selectedOption = transmission,
+            onOptionSelected = { transmission = it }
+        )
 
         Text(
             text = "Notes (optional):",
@@ -238,6 +251,46 @@ fun AddCarScreen(
         }
 
         Spacer(modifier = Modifier.height(16.dp))
+    }
+}
+
+@Composable
+fun Win98ChoiceRow(
+    options: List<String>,
+    selectedOption: String,
+    onOptionSelected: (String) -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        options.forEach { option ->
+            // Try to match even if the string is slightly different (e.g. "AWD" vs "AWD System")
+            val isSelected = selectedOption.contains(option, ignoreCase = true) || option.contains(selectedOption, ignoreCase = true) && selectedOption.isNotEmpty()
+            val interactionSource = remember { MutableInteractionSource() }
+            val isPressed by interactionSource.collectIsPressedAsState()
+
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .weight(1f)
+                    .background(if (isSelected) Win98Blue else Win98Gray)
+                    .win98Border(pressed = isPressed || isSelected)
+                    .clickable(
+                        interactionSource = interactionSource,
+                        indication = null
+                    ) { onOptionSelected(option) }
+                    .padding(vertical = 8.dp)
+            ) {
+                Text(
+                    text = option,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = if (isSelected) Win98White else Win98Black,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
     }
 }
 

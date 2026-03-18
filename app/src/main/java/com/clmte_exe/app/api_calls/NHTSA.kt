@@ -39,21 +39,50 @@ class NhtsaApi {
         fun getValue(name: String): String? =
             response.Results.firstOrNull { it.Variable.equals(name, ignoreCase = true) }?.Value
 
+        // Validation: Check NHTSA Error Code
+        val errorCode = getValue("Error Code")
+        if (errorCode != null && errorCode != "0") {
+            val errorText = getValue("Error Text") ?: "Unknown API Error"
+            throw Exception("NHTSA Error: $errorText (Code $errorCode)")
+        }
+
+        val make = getValue("Make")
+        val model = getValue("Model")
+        val yearString = getValue("Model Year")
+        val year = yearString?.toIntOrNull()
+
+        // Validation: Ensure essential data is present
+        if (make.isNullOrBlank() || model.isNullOrBlank() || year == null) {
+            throw Exception("Incomplete vehicle data returned from NHTSA.")
+        }
+
+        val rawBodyClass = getValue("Body Class")
+        val normalizedBodyClass = when {
+            rawBodyClass?.contains("pickup", ignoreCase = true) == true || rawBodyClass?.contains("truck", ignoreCase = true) == true -> "Truck"
+            rawBodyClass?.contains("suv", ignoreCase = true) == true || rawBodyClass?.contains("sport utility", ignoreCase = true) == true || rawBodyClass?.contains("crossover", ignoreCase = true) == true -> "SUV"
+            else -> "Sedan"
+        }
+
+        val rawTrans = getValue("Transmission Style")
+        val normalizedTrans = if (rawTrans?.contains("manual", ignoreCase = true) == true) "Manual" else "Automatic"
+
+        val rawDrive = getValue("Drive Type")
+        val normalizedDrive = when {
+            rawDrive?.contains("4wd", ignoreCase = true) == true || rawDrive?.contains("4x4", ignoreCase = true) == true -> "4WD"
+            rawDrive?.contains("awd", ignoreCase = true) == true || rawDrive?.contains("all wheel", ignoreCase = true) == true -> "AWD"
+            rawDrive?.contains("rwd", ignoreCase = true) == true || rawDrive?.contains("rear wheel", ignoreCase = true) == true -> "RWD"
+            else -> "FWD"
+        }
+
         return Vehicle(
-            make = getValue("Make"),
-            model = getValue("Model"),
-            year = getValue("Model Year") as Int?,
-            bodyClass = getValue("Body Class"),
+            make = make,
+            model = model,
+            year = year,
+            bodyClass = normalizedBodyClass,
             engineCylinders = getValue("Engine Number of Cylinders"),
             engineDisplacement = getValue("Displacement (L)"),
-            driveType = getValue("Drive Type"),
-            transmission = getValue("Transmission Style")
+            driveType = normalizedDrive,
+            transmission = normalizedTrans
         )
-    }
-
-    fun shutdown() {
-        okHttpClient.dispatcher.executorService.shutdown()
-        okHttpClient.connectionPool.evictAll()
-        okHttpClient.cache?.close()
     }
 }

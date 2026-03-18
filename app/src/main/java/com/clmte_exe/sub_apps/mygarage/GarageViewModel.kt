@@ -1,6 +1,9 @@
 package com.clmte_exe.sub_apps.mygarage
 
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.clmte_exe.app.R
@@ -12,55 +15,67 @@ class GarageViewModel : ViewModel() {
     val cars = mutableStateListOf<GarageCar>()
     private val firestoreManager = FirestoreManager()
 
+    var isLoading by mutableStateOf(false)
+        private set
+
     // Starts empty — user adds cars via "+"
 
     fun addCar(
         vehicle: Vehicle
     ) {
-
-        val vehicleId = UUID.randomUUID().toString()
-
         viewModelScope.launch {
-            firestoreManager.saveDocument(
-                collection = "vehicles",
-                documentId = vehicleId,
-                data = vehicle
-            )
-        }
+            isLoading = true
+            try {
+                val vehicleId = UUID.randomUUID().toString()
+                
+                // Create a copy of the vehicle with the new ID if the data class supported it, 
+                // but since it's a val id we pass it to saveDocument.
+                
+                firestoreManager.saveDocument(
+                    collection = "vehicles",
+                    documentId = vehicleId,
+                    data = vehicle.copy(id = vehicleId)
+                )
 
-        val type = CarType.valueOf(vehicle.vehicle_type.uppercase())
-        // Existing local UI logic
-        val template = carTemplates[type] ?: return
-
-        val car = GarageCar(
-            id = vehicleId,
-            title = vehicle.nickname.ifBlank {
-                "${vehicle.year} ${vehicle.make} ${vehicle.model}"
-            },
-            imageRes = template.imageRes,
-            transmissionInfo = template.transmissionInfo,
-            engineInfo = template.engineInfo,
-            tireInfo = template.tireInfo,
-            suspensionInfo = template.suspensionInfo,
-            fullDetails = buildString {
-                appendLine("Type: ${vehicle.vehicle_type}")
-                appendLine("Make: ${vehicle.make}")
-                appendLine("Model: ${vehicle.model}")
-                appendLine("Year: ${vehicle.year}")
-                appendLine("VIN: ${vehicle.vin_number}")
-                appendLine("Drive Type: ${vehicle.drive_type}")
-                appendLine("Transmission: ${vehicle.transmission}")
-                appendLine("Odometer: ${vehicle.odometer}")
-                if (vehicle.notes.isNotEmpty()) {
-                    appendLine("Notes: ${vehicle.notes.joinToString()}")
+                val type = try {
+                    CarType.valueOf(vehicle.vehicle_type.uppercase())
+                } catch (e: Exception) {
+                    CarType.SEDAN
                 }
-                appendLine()
-                append(template.fullDetails)
+                
+                val template = carTemplates[type] ?: carTemplates[CarType.SEDAN]!!
 
+                val car = GarageCar(
+                    id = vehicleId,
+                    title = vehicle.nickname.ifBlank {
+                        "${vehicle.year} ${vehicle.make} ${vehicle.model}"
+                    },
+                    imageRes = template.imageRes,
+                    transmissionInfo = template.transmissionInfo,
+                    engineInfo = template.engineInfo,
+                    tireInfo = template.tireInfo,
+                    suspensionInfo = template.suspensionInfo,
+                    fullDetails = buildString {
+                        appendLine("Type: ${vehicle.vehicle_type}")
+                        appendLine("Make: ${vehicle.make}")
+                        appendLine("Model: ${vehicle.model}")
+                        appendLine("Year: ${vehicle.year}")
+                        appendLine("VIN: ${vehicle.vin_number}")
+                        appendLine("Drive Type: ${vehicle.drive_type}")
+                        appendLine("Transmission: ${vehicle.transmission}")
+                        appendLine("Odometer: ${vehicle.odometer}")
+                        if (vehicle.notes.isNotEmpty()) {
+                            appendLine("Notes: ${vehicle.notes.joinToString()}")
+                        }
+                        appendLine()
+                        append(template.fullDetails)
+                    }
+                )
+                cars.add(car)
+            } finally {
+                isLoading = false
             }
-        )
-
-        cars.add(car)
+        }
     }
 
     fun deleteCar(car: GarageCar) {
@@ -77,47 +92,50 @@ class GarageViewModel : ViewModel() {
     // Load in the cars from firebase
     fun loadCars() {
         viewModelScope.launch {
-            val vehicles = firestoreManager.getAllDocuments<Vehicle>("vehicles")
+            isLoading = true
+            try {
+                val vehicles = firestoreManager.getAllDocuments<Vehicle>("vehicles")
 
-            cars.clear()
+                cars.clear()
 
-            vehicles.forEach { vehicle ->
-                val type = try {
-                    CarType.valueOf(vehicle.vehicle_type?.uppercase().orEmpty())
-                } catch (e: Exception) {
-                    CarType.SEDAN
-                }
+                vehicles.forEach { vehicle ->
+                    val type = try {
+                        CarType.valueOf(vehicle.vehicle_type.uppercase())
+                    } catch (e: Exception) {
+                        CarType.SEDAN
+                    }
 
-                val template = carTemplates[type] ?: carTemplates[CarType.SEDAN]!!
+                    val template = carTemplates[type] ?: carTemplates[CarType.SEDAN]!!
 
-                val vehicleId = vehicle.vin_number?.takeIf { it.isNotBlank() } ?: UUID.randomUUID().toString()
-
-                cars.add(
-                    GarageCar(
-                        id = vehicleId,
-                        title = vehicle.nickname.ifBlank { "${vehicle.year} ${vehicle.make} ${vehicle.model}" },
-                        imageRes = template.imageRes,
-                        transmissionInfo = template.transmissionInfo,
-                        engineInfo = template.engineInfo,
-                        tireInfo = template.tireInfo,
-                        suspensionInfo = template.suspensionInfo,
-                        fullDetails = buildString {
-                            appendLine("Type: ${vehicle.vehicle_type ?: "Unknown"}")
-                            appendLine("Make: ${vehicle.make ?: "Unknown"}")
-                            appendLine("Model: ${vehicle.model ?: "Unknown"}")
-                            appendLine("Year: ${vehicle.year ?: "Unknown"}")
-                            appendLine("VIN: ${vehicle.vin_number ?: "Unknown"}")
-                            appendLine("Drive Type: ${vehicle.drive_type ?: "Unknown"}")
-                            appendLine("Transmission: ${vehicle.transmission ?: "Unknown"}")
-                            appendLine("Odometer: ${vehicle.odometer ?: "Unknown"}")
-                            vehicle.notes?.takeIf { it.isNotEmpty() }?.let {
-                                appendLine("Notes: ${it.joinToString()}")
+                    cars.add(
+                        GarageCar(
+                            id = vehicle.id,
+                            title = vehicle.nickname.ifBlank { "${vehicle.year} ${vehicle.make} ${vehicle.model}" },
+                            imageRes = template.imageRes,
+                            transmissionInfo = template.transmissionInfo,
+                            engineInfo = template.engineInfo,
+                            tireInfo = template.tireInfo,
+                            suspensionInfo = template.suspensionInfo,
+                            fullDetails = buildString {
+                                appendLine("Type: ${vehicle.vehicle_type}")
+                                appendLine("Make: ${vehicle.make}")
+                                appendLine("Model: ${vehicle.model}")
+                                appendLine("Year: ${vehicle.year}")
+                                appendLine("VIN: ${vehicle.vin_number}")
+                                appendLine("Drive Type: ${vehicle.drive_type}")
+                                appendLine("Transmission: ${vehicle.transmission}")
+                                appendLine("Odometer: ${vehicle.odometer}")
+                                if (vehicle.notes.isNotEmpty()) {
+                                    appendLine("Notes: ${vehicle.notes.joinToString()}")
+                                }
+                                appendLine()
+                                append(template.fullDetails)
                             }
-                            appendLine()
-                            append(template.fullDetails)
-                        }
+                        )
                     )
-                )
+                }
+            } finally {
+                isLoading = false
             }
         }
     }
