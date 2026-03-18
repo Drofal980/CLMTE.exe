@@ -534,9 +534,13 @@ fun CarInfoScreen(component: CarComponentInfo, onBack: () -> Unit) {
                     interactionSource = interactionSource, indication = null, onClick = onBack
                 )
             ) {
-                Text(text = "←", fontSize = 14.sp, color = Win98Black, fontWeight = FontWeight.Bold)
+                Image(
+                    painter = painterResource(R.drawable.backarrow),
+                    contentDescription = "backarrow",
+                    modifier = Modifier.size(20.dp),
+                )
             }
-            Image(painter = painterResource(component.iconRes), contentDescription = component.label, modifier = Modifier.size(18.dp))
+            Image(painter = painterResource(component.iconRes), contentDescription = component.label, modifier = Modifier.size(30.dp))
             Text(text = component.label, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp, modifier = Modifier.weight(1f))
         }
 
