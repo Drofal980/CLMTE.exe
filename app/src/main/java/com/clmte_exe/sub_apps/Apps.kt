@@ -273,4 +273,3 @@ fun InternetExplorerApp() {
         Text("AI Assistant", color = appText, fontWeight = FontWeight.Bold)
     }
 }
-

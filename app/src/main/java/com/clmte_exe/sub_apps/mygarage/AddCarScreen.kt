@@ -1,8 +1,7 @@
-package com.clmte_exe.app.mygarage
+package com.clmte_exe.sub_apps.mygarage
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -18,8 +17,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.clmte_exe.app.R
@@ -246,7 +247,7 @@ fun Win98TextField(
     onValueChange: (String) -> Unit,
     placeholder: String = "",
     singleLine: Boolean = true,
-    minHeight: androidx.compose.ui.unit.Dp = 36.dp
+    minHeight: Dp = 36.dp
 ) {
     Box(
         modifier = Modifier
@@ -269,7 +270,7 @@ fun Win98TextField(
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent
             ),
-            textStyle = androidx.compose.ui.text.TextStyle(fontSize = 13.sp),
+            textStyle = TextStyle(fontSize = 13.sp),
             modifier = Modifier.fillMaxWidth()
         )
     }

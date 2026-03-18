@@ -1,4 +1,4 @@
-package com.clmte_exe.app.mygarage
+package com.clmte_exe.sub_apps.mygarage
 
 import com.google.firebase.firestore.DocumentId
 
