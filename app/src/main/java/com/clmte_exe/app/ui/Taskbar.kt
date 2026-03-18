@@ -1,4 +1,4 @@
-package com.clmte_exe.app
+package com.clmte_exe.app.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -13,6 +13,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.clmte_exe.app.R
+import com.clmte_exe.sub_apps.settings.ThemeManager
 import java.text.SimpleDateFormat
 import java.util.*
 

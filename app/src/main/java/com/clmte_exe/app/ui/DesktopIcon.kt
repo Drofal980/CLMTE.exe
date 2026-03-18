@@ -1,4 +1,4 @@
-package com.clmte_exe.app
+package com.clmte_exe.app.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable

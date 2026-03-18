@@ -1,4 +1,4 @@
-package com.clmte_exe.app
+package com.clmte_exe.app.ui
 import androidx.activity.compose.BackHandler
 import androidx.compose.material3.Scaffold
 import androidx.compose.foundation.background
@@ -17,7 +17,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.clmte_exe.app.ThemeManager
+import com.clmte_exe.sub_apps.AppType
+import com.clmte_exe.sub_apps.datetime.DateTimeApp
+import com.clmte_exe.sub_apps.settings.ThemeManager
+import com.clmte_exe.sub_apps.allApps
 
 
 val desktopApps = allApps.filter { it.type == AppType.SYSTEM }

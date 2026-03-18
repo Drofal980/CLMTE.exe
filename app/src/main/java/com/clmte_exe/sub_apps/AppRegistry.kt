@@ -1,7 +1,8 @@
-package com.clmte_exe.app
+package com.clmte_exe.sub_apps
 
 import androidx.compose.runtime.Composable
-import com.clmte_exe.app.todo.TodoApp
+import com.clmte_exe.app.R
+import com.clmte_exe.sub_apps.todo.TodoApp
 
 enum class AppType {
     SYSTEM,

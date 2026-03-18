@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import com.clmte_exe.app.ui.DesktopScreen
 import com.clmte_exe.app.ui.theme.Win98Theme
 
 class MainActivity : ComponentActivity() {
