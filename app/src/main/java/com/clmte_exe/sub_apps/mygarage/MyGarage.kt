@@ -409,6 +409,21 @@ fun CarDetailsScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             item {
+                Box(
+                    modifier = Modifier
+                        .padding(bottom = 6.dp)
+                        .size(25.dp)
+                        .background(Win98Gray)
+                        .win98Border(false)
+                        .clickable(onClick = onClose),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.backarrow),
+                        contentDescription = "backarrow",
+                        modifier = Modifier.size(20.dp),
+                    )
+                }
                 // Car image
                 Box(
                     modifier = Modifier
