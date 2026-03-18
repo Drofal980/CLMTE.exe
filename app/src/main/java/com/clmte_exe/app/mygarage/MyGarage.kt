@@ -30,10 +30,16 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.clmte_exe.app.R
 import com.clmte_exe.app.ThemeManager
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.BasicAlertDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onGloballyPositioned
+import com.clmte_exe.app.win98Border
 
 data class GarageCar(
     val id: String,
@@ -71,10 +77,30 @@ fun MyGarageApp(garageViewModel: GarageViewModel = viewModel()) {
     var selectedComponent by remember { mutableStateOf<CarComponentInfo?>(null) }
 
     var trashPosition by remember { mutableStateOf<Offset?>(null) }
+    var showDeleteConfirm by remember { mutableStateOf(false) }
+    var carToDelete by remember { mutableStateOf<GarageCar?>(null) }
+
+    // If they select yes it deletes, if no then doesn't delete
+    if (showDeleteConfirm && carToDelete != null) {
+        DeleteConfirm(
+            car = carToDelete!!,
+            onConfirm = {
+                garageViewModel.deleteCar(carToDelete!!)
+                showDeleteConfirm = false
+                carToDelete = null
+            },
+            onDismiss = {
+                showDeleteConfirm = false
+                carToDelete = null
+            }
+        )
+    }
 
     when (currentNav) {
         GarageNav.LIST -> {
-            Box(modifier = Modifier.fillMaxSize().background(Win98Gray)) {
+            Box(modifier = Modifier
+                .fillMaxSize()
+                .background(Win98Gray)) {
                 if (garageViewModel.cars.isEmpty()) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text(
@@ -108,8 +134,9 @@ fun MyGarageApp(garageViewModel: GarageViewModel = viewModel()) {
                                             dropPosition.x - trashCenter.x,
                                             dropPosition.y - trashCenter.y
                                         )
-                                        if (distance > 100f) {
-                                            garageViewModel.deleteCar(car)
+                                        if (distance < 500f) {
+                                            carToDelete = car
+                                            showDeleteConfirm = true
                                         }
                                     }
                                 }
@@ -121,7 +148,9 @@ fun MyGarageApp(garageViewModel: GarageViewModel = viewModel()) {
                 }
 
                 Box(
-                    modifier = Modifier.align(Alignment.BottomEnd).padding(20.dp)
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(20.dp)
                 ) {
                     Win98FabButton(onClick = { currentNav = GarageNav.ADD_CAR })
                 }
@@ -190,6 +219,88 @@ fun MyGarageApp(garageViewModel: GarageViewModel = viewModel()) {
     }
 }
 
+// Alert for deleting a car
+// Since the BasicAlert is experimental material, had to put the experimental annotation
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DeleteConfirm(
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+    car: GarageCar
+) {
+    BasicAlertDialog(
+        onDismissRequest = onDismiss
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(4.dp)
+                .background(Win98Gray)
+                .win98Border(true)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Win98Blue)
+                    .win98Border(false)
+                    .padding(4.dp)
+            ) {
+                Text(
+                    text = "Delete ${car.title}?",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp,
+                    color = Color.White,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                )
+            }
+
+            Spacer(Modifier.height(12.dp))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                horizontalArrangement = Arrangement.End
+            ) {
+                TextButton(onClick = onDismiss) {
+                    Box(
+                        modifier = Modifier
+                            .background(Win98Gray)
+                            .win98Border(false)
+                            .padding(10.dp)
+                    ) {
+                        Text(
+                            text = "No",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp,
+                            color = Win98Black
+                        )
+                    }
+                }
+
+                TextButton(onClick = onConfirm) {
+                    Box(
+                        modifier = Modifier
+                            .background(Win98Gray)
+                            .win98Border(false)
+                            .padding(10.dp)
+                    ) {
+                        Text(
+                            text = "Yes",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp,
+                            color = Win98Black
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+
 @Composable
 fun Win98FabButton(onClick: () -> Unit) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -226,12 +337,13 @@ fun GarageCarCard(
             .fillMaxWidth()
             .offset { IntOffset(offsetX.toInt(), offsetY.toInt()) }
             .onGloballyPositioned { coordinates ->
-                cardPosition.value = coordinates.localToRoot(Offset.Zero)}
-            .pointerInput(Unit){
-                detectDragGestures (
+                cardPosition.value = coordinates.localToRoot(Offset.Zero)
+            }
+            .pointerInput(Unit) {
+                detectDragGestures(
                     onDragEnd = {
                         // reset card position after grabbed
-                        val dropPosition = cardPosition.value + Offset(offsetX, offsetY)
+                        val dropPosition = cardPosition.value
                         onDrop(dropPosition)
                         offsetX = 0f
                         offsetY = 0f
@@ -257,8 +369,6 @@ fun GarageCarCard(
         ) {
             Text(text = car.title, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
         }
-
-        Spacer(modifier = Modifier.height(3.dp))
 
         Box(
             modifier = Modifier
@@ -294,10 +404,14 @@ fun CarDetailsScreen(
     onComponentClick: (CarComponentInfo) -> Unit
 ) {
     Column(
-        modifier = Modifier.fillMaxSize().background(Win98Gray)
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Win98Gray)
     ) {
         LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(12.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             item {
@@ -333,7 +447,9 @@ fun CarDetailsScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    val btnMod = Modifier.weight(1f).height(64.dp)
+                    val btnMod = Modifier
+                        .weight(1f)
+                        .height(64.dp)
 
                     CarActionButton(
                         label = "TRANSMISSION",
@@ -389,7 +505,9 @@ fun CarInfoScreen(
     onBack: () -> Unit
 ) {
     Column(
-        modifier = Modifier.fillMaxSize().background(Win98Gray)
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Win98Gray)
     ) {
         // Header bar with back button
         Row(
@@ -410,7 +528,11 @@ fun CarInfoScreen(
                     .size(24.dp)
                     .background(Win98Gray)
                     .win98Border(pressed = isPressed)
-                    .clickable(interactionSource = interactionSource, indication = null, onClick = onBack)
+                    .clickable(
+                        interactionSource = interactionSource,
+                        indication = null,
+                        onClick = onBack
+                    )
             ) {
                 Text(text = "←", fontSize = 14.sp, color = Win98Black, fontWeight = FontWeight.Bold)
             }

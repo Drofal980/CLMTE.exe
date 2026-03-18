@@ -70,14 +70,14 @@ class GarageViewModel : ViewModel() {
     }
 
     fun deleteCar(car: GarageCar) {
-        cars.remove(car)
-
         viewModelScope.launch {
             firestoreManager.deleteDocument(
                 collection = "vehicles",
                 documentId = car.id
             )
         }
+        cars.remove(car)
+
     }
 
     // Load in the cars from firebase
