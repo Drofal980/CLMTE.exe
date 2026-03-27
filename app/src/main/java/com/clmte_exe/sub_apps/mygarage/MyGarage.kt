@@ -34,6 +34,7 @@ import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TextButton
+import com.clmte_exe.sub_apps.mygarage.InspectionManager
 
 data class GarageCar(
     val id: String,
@@ -228,9 +229,15 @@ fun MyGarageApp(garageViewModel: GarageViewModel = viewModel()) {
 
             GarageNav.CAR_DETAILS -> {
                 BackHandler { currentNav = GarageNav.LIST }
+
                 selectedCar?.let { car ->
+
+                    val vehicle = garageViewModel.getVehiclebyid(car.id)
+
+
                     CarDetailsScreen(
                         car = car,
+                        vehicle = vehicle ?: return@let,
                         onClose = { currentNav = GarageNav.LIST },
                         onComponentClick = { component ->
                             selectedComponent = component
@@ -439,34 +446,68 @@ fun GarageCarCard(
     }
 }
 
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CarDetailsScreen(
     car: GarageCar,
     onClose: () -> Unit,
+    vehicle: Vehicle,
     onComponentClick: (CarComponentInfo) -> Unit
 ) {
+
+    var showErrorDialog by remember { mutableStateOf(false) }
+    var resolvedErrors by remember {mutableStateOf(setOf<String>())}
+
+    val errors = remember(vehicle) {
+        InspectionManager.getInspectionErrors(vehicle)
+    }
+
+
     Column(
         modifier = Modifier.fillMaxSize().background(Win98Gray)
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            item {
-                Box(
-                    modifier = Modifier
-                        .padding(bottom = 6.dp)
-                        .size(25.dp)
-                        .background(Win98Gray)
-                        .win98Border(false)
-                        .clickable(onClick = onClose),
-                    contentAlignment = Alignment.Center,
+        ) { item{
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Image(
-                        painter = painterResource(R.drawable.backarrow),
-                        contentDescription = "backarrow",
-                        modifier = Modifier.size(20.dp),
-                    )
+                    // Back button
+                    Box(
+                        modifier = Modifier
+                            .size(25.dp)
+                            .background(Win98Gray)
+                            .win98Border(false)
+                            .clickable(onClick = onClose),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Image(
+                            painter = painterResource(R.drawable.backarrow),
+                            contentDescription = "backarrow",
+                            modifier = Modifier.size(20.dp),
+                        )
+                    }
+                    // Error Icon (only show if errors exist)
+                    if (errors.isNotEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .size(30.dp)
+                                .background(Win98Gray)
+                                .win98Border(false)
+                                .clickable { showErrorDialog = true },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Image(
+                                painter = painterResource(R.drawable.error), // <-- add icon
+                                contentDescription = "Errors",
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    }
                 }
                 Box(
                     modifier = Modifier
@@ -487,8 +528,7 @@ fun CarDetailsScreen(
                 Text(text = car.title, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Win98Black)
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(text = car.fullDetails, fontSize = 13.sp, color = Win98Black, lineHeight = 19.sp)
-                Spacer(modifier = Modifier.height(16.dp))
-
+                Spacer(modifier = Modifier.height(12.dp))
                 Text(text = "Components:", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Win98Black)
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -511,6 +551,91 @@ fun CarDetailsScreen(
                     })
                 }
                 Spacer(modifier = Modifier.height(24.dp))
+            }
+        }
+    }
+
+    if (showErrorDialog) {
+        BasicAlertDialog(onDismissRequest = { showErrorDialog = false }) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Win98Gray)
+                    .win98Border(true)
+                    .padding(4.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Win98Blue)
+                        .win98Border(false)
+                        .padding(4.dp)
+                ) {Text(
+                    text = "Inspection Errors",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    color = Color.White
+                )}
+
+                // Back button for dialog
+                Box(
+                    modifier = Modifier
+                        .size(25.dp)
+                        .background(Win98Gray)
+                        .win98Border(false)
+                        .clickable { showErrorDialog = false }, // Only closes dialog
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.backarrow),
+                        contentDescription = "backarrow",
+                        modifier = Modifier.size(20.dp),
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                if (errors.isEmpty()) {
+                    Text("No issues found!", color = Win98Black)
+                } else {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(max = 300.dp)
+                            .padding(horizontal = 4.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        errors.forEach { error ->
+                            item {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 4.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(
+                                        text = error,
+                                        color = Color.Red,
+                                        fontSize = 12.sp,
+                                        modifier = Modifier.weight(1f)
+                                    )
+
+                                    // Can change to going to the logs and filling on out
+                                    TextButton(onClick = {
+                                        resolvedErrors = resolvedErrors + error
+                                    }) {
+                                        Text(
+                                            "Fix",
+                                            color = Win98Blue,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 12.sp
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }

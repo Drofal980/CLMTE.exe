@@ -13,6 +13,8 @@ import java.util.UUID
 
 class GarageViewModel : ViewModel() {
     val cars = mutableStateListOf<GarageCar>()
+
+    val vehicles = mutableStateListOf<Vehicle>()
     private val firestoreManager = FirestoreManager()
 
     var isLoading by mutableStateOf(false)
@@ -94,11 +96,15 @@ class GarageViewModel : ViewModel() {
         viewModelScope.launch {
             isLoading = true
             try {
-                val vehicles = firestoreManager.getAllDocuments<Vehicle>("vehicles")
+                val vehiclesFromFire = firestoreManager.getAllDocuments<Vehicle>("vehicles")
 
                 cars.clear()
+                vehicles.clear()
 
-                vehicles.forEach { vehicle ->
+                vehiclesFromFire.forEach { vehicle ->
+
+                    vehicles.add(vehicle)
+
                     val type = try {
                         CarType.valueOf(vehicle.vehicle_type.uppercase())
                     } catch (e: Exception) {
@@ -138,6 +144,10 @@ class GarageViewModel : ViewModel() {
                 isLoading = false
             }
         }
+    }
+
+    fun getVehiclebyid(id:String): Vehicle?{
+        return vehicles.find { it.id == id }
     }
 }
 
