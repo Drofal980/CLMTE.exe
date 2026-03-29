@@ -39,10 +39,6 @@ data class GarageCar(
     val id: String,
     val title: String,
     val imageRes: Int,
-    val transmissionInfo: String,
-    val engineInfo: String,
-    val tireInfo: String,
-    val suspensionInfo: String,
     val fullDetails: String
 )
 
@@ -54,7 +50,7 @@ val Win98Black: Color get() = if (ThemeManager.isDarkMode) Color(0xFFE0E0E0) els
 
 enum class GarageNav { LIST, ADD_CHOICE, VIN_LOOKUP, ADD_CAR, CAR_DETAILS, CAR_INFO }
 
-data class CarComponentInfo(val label: String, val info: String, val iconRes: Int)
+data class CarComponentInfo(val label: String, val iconRes: Int)
 
 @Composable
 fun MyGarageApp(garageViewModel: GarageViewModel = viewModel()) {
@@ -487,27 +483,20 @@ fun CarDetailsScreen(
                 Text(text = car.title, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Win98Black)
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(text = car.fullDetails, fontSize = 13.sp, color = Win98Black, lineHeight = 19.sp)
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Text(text = "Components:", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Win98Black)
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(2.dp))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     val btnMod = Modifier.weight(1f).height(64.dp)
-                    CarActionButton(label = "TRANSMISSION", iconRes = R.drawable.transmission, modifier = btnMod, onClick = {
-                        onComponentClick(CarComponentInfo("Transmission", car.transmissionInfo, R.drawable.transmission))
+                    CarActionButton(label = "UPDATE ODOMETER", iconRes = R.drawable.transmission, modifier = btnMod, onClick = {
+                        // TODO: Update to point to class for updating odometer
+                        onComponentClick(CarComponentInfo("Update Odometer", R.drawable.transmission))
                     })
-                    CarActionButton(label = "ENGINE", iconRes = R.drawable.engine, modifier = btnMod, onClick = {
-                        onComponentClick(CarComponentInfo("Engine", car.engineInfo, R.drawable.engine))
-                    })
-                    CarActionButton(label = "TIRES", iconRes = R.drawable.tire, modifier = btnMod, onClick = {
-                        onComponentClick(CarComponentInfo("Tires", car.tireInfo, R.drawable.tire))
-                    })
-                    CarActionButton(label = "SUSPENSION", iconRes = R.drawable.suspension, modifier = btnMod, onClick = {
-                        onComponentClick(CarComponentInfo("Suspension", car.suspensionInfo, R.drawable.suspension))
+                    CarActionButton(label = "ADD SERVICE HISTORY", iconRes = R.drawable.engine, modifier = btnMod, onClick = {
+                        onComponentClick(CarComponentInfo("Add Service History", R.drawable.engine))
+                        // TODO: Add service history script
                     })
                 }
                 Spacer(modifier = Modifier.height(24.dp))
@@ -542,27 +531,6 @@ fun CarInfoScreen(component: CarComponentInfo, onBack: () -> Unit) {
             }
             Image(painter = painterResource(component.iconRes), contentDescription = component.label, modifier = Modifier.size(30.dp))
             Text(text = component.label, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp, modifier = Modifier.weight(1f))
-        }
-
-        Column(
-            modifier = Modifier.fillMaxSize().padding(16.dp).win98Border(pressed = true).padding(12.dp)
-        ) {
-            component.info.lines().forEach { line ->
-                if (line.isBlank()) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                } else {
-                    val parts = line.split(":", limit = 2)
-                    if (parts.size == 2) {
-                        Row(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Text(text = parts[0].trim() + ":", fontWeight = FontWeight.Bold, color = Win98Black, fontSize = 12.sp, modifier = Modifier.widthIn(min = 100.dp))
-                            Text(text = parts[1].trim(), color = Win98Black, fontSize = 12.sp, modifier = Modifier.weight(1f))
-                        }
-                        Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Win98DarkGray.copy(alpha = 0.3f)))
-                    } else {
-                        Text(text = line, color = Win98Black, fontSize = 12.sp, lineHeight = 18.sp, modifier = Modifier.padding(vertical = 4.dp))
-                    }
-                }
-            }
         }
     }
 }
