@@ -1,7 +1,24 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+<<<<<<< Updated upstream
+=======
+    alias(libs.plugins.google.services)
+>>>>>>> Stashed changes
 }
+
+val localProps = Properties().apply {
+    val localFile = rootProject.file("local.properties")
+    if (localFile.exists()) {
+        FileInputStream(localFile).use { load(it) }
+    }
+}
+val openAiApiKey = (localProps.getProperty("OPENAI_API_KEY")
+    ?: System.getenv("OPENAI_API_KEY")
+    ?: "").trim()
 
 android {
     namespace = "com.clmte.win98"
@@ -15,6 +32,7 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
+        buildConfigField("String", "OPENAI_API_KEY", "\"$openAiApiKey\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -34,10 +52,12 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
 dependencies {
+    implementation("com.google.accompanist:accompanist-flowlayout:0.34.0")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -53,4 +73,13 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+<<<<<<< Updated upstream
+=======
+    implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
+    implementation("com.google.firebase:firebase-firestore-ktx")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.10.2")
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+>>>>>>> Stashed changes
 }
