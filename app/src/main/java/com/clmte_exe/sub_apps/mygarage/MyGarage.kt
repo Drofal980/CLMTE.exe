@@ -117,8 +117,17 @@ fun MyGarageApp(garageViewModel: GarageViewModel = viewModel()) {
                             modifier = Modifier.fillMaxSize()
                         ) {
                             items(garageViewModel.cars) { car ->
+                                val vehicle = garageViewModel.getVehiclebyid(car.id)
+                                val errorCount = vehicle?.let { InspectionManager.getInspectionErrors(it).size } ?: 0
+
+                                val backgroundImg = when {
+                                    errorCount >= 10 -> R.drawable.rainy
+                                    errorCount >= 5 -> R.drawable.hazy
+                                    else -> R.drawable.sunny
+                                }
                                 GarageCarCard(
                                     car = car,
+                                    backgroundImg = backgroundImg,
                                     onCardClick = {
                                         selectedCarId = car.id
                                         currentNav = GarageNav.CAR_DETAILS
@@ -774,6 +783,7 @@ fun Win98FabButton(onClick: () -> Unit) {
 @Composable
 fun GarageCarCard(
     car: GarageCar,
+    backgroundImg: Int,
     onCardClick: () -> Unit,
     onDelete: (GarageCar) -> Unit,
     onDrop: (Offset) -> Unit,
@@ -831,11 +841,16 @@ fun GarageCarCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(140.dp)
-                .background(Color.White)
                 .win98Border(pressed = true)
                 .clickable(onClick = onCardClick)
                 .padding(2.dp)
         ) {
+            Image(
+                painter = painterResource(backgroundImg),
+                contentDescription = car.title,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
             Image(
                 painter = painterResource(car.imageRes),
                 contentDescription = car.title,
@@ -874,6 +889,11 @@ fun CarDetailsScreen(
         InspectionManager.getInspectionErrors(vehicle)
     }
 
+    val backgroundImg = when {
+        errors.size >= 10 -> R.drawable.rainy
+        errors.size >= 5 -> R.drawable.hazy
+        else -> R.drawable.sunny
+    }
 
     Column(
         modifier = Modifier.fillMaxSize().background(Win98Gray)
@@ -924,10 +944,15 @@ fun CarDetailsScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(180.dp)
-                        .background(Color.White)
                         .win98Border(pressed = true)
                         .padding(2.dp)
                 ) {
+                    Image(
+                        painter = painterResource(backgroundImg),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
                     Image(
                         painter = painterResource(car.imageRes),
                         contentDescription = car.title,
