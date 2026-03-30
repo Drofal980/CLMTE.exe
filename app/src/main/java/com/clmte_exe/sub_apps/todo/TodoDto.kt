@@ -14,10 +14,8 @@ val pastelColors = listOf(PastelGreen, PastelBlue, PastelPink, PastelYellow, Pas
 
 data class TodoItem(
     val id: String = UUID.randomUUID().toString(),
-    val carId: String,
     val title: String,
     val description: String,
-    val done: Boolean = false,
-    val color: Color = pastelColors.random(),
-    val createdAt: Long = System.currentTimeMillis()
+    val isDone: Boolean = false,
+    val color: Color = pastelColors.random()
 )
