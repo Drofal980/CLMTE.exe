@@ -34,7 +34,6 @@ import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TextButton
-import com.clmte_exe.sub_apps.mygarage.InspectionManager
 
 data class GarageCar(
     val id: String,
@@ -49,7 +48,7 @@ val Win98White: Color get() = if (ThemeManager.isDarkMode) Color(0xFF5A5A5A) els
 val Win98DarkGray: Color get() = if (ThemeManager.isDarkMode) Color(0xFF2A2A2A) else Color(0xFF808080)
 val Win98Black: Color get() = if (ThemeManager.isDarkMode) Color(0xFFE0E0E0) else Color(0xFF000000)
 
-enum class GarageNav { LIST, ADD_CHOICE, VIN_LOOKUP, ADD_CAR, CAR_DETAILS, CAR_INFO }
+enum class GarageNav { LIST, ADD_CHOICE, VIN_LOOKUP, ADD_CAR, CAR_DETAILS, CAR_INFO, UPDATE_ODOMETER }
 
 data class CarComponentInfo(val label: String, val iconRes: Int)
 
@@ -61,7 +60,7 @@ fun MyGarageApp(garageViewModel: GarageViewModel = viewModel()) {
     }
 
     var currentNav by remember { mutableStateOf(GarageNav.LIST) }
-    var selectedCar by remember { mutableStateOf<GarageCar?>(null) }
+    var selectedCarId by remember { mutableStateOf<String?>(null) }
     var selectedComponent by remember { mutableStateOf<CarComponentInfo?>(null) }
     var vehicleToEdit by remember { mutableStateOf<Vehicle?>(null) }
 
@@ -75,12 +74,9 @@ fun MyGarageApp(garageViewModel: GarageViewModel = viewModel()) {
             car = carToDelete!!,
             onConfirm = {
                 garageViewModel.deleteCar(carToDelete!!)
-                showDeleteConfirm = false
                 carToDelete = null
             },
             onDismiss = {
-                showDeleteConfirm = false
-                carToDelete = null
             }
         )
     }
@@ -109,7 +105,7 @@ fun MyGarageApp(garageViewModel: GarageViewModel = viewModel()) {
                                 GarageCarCard(
                                     car = car,
                                     onCardClick = {
-                                        selectedCar = car
+                                        selectedCarId = car.id
                                         currentNav = GarageNav.CAR_DETAILS
                                     },
                                     onDelete = {
@@ -226,20 +222,24 @@ fun MyGarageApp(garageViewModel: GarageViewModel = viewModel()) {
             GarageNav.CAR_DETAILS -> {
                 BackHandler { currentNav = GarageNav.LIST }
 
-                selectedCar?.let { car ->
+                selectedCarId?.let { id ->
+                    val car = garageViewModel.cars.find { it.id == id }
+                    val vehicle = garageViewModel.getVehiclebyid(id)
 
-                    val vehicle = garageViewModel.getVehiclebyid(car.id)
-
-
-                    CarDetailsScreen(
-                        car = car,
-                        vehicle = vehicle ?: return@let,
-                        onClose = { currentNav = GarageNav.LIST },
-                        onComponentClick = { component ->
-                            selectedComponent = component
-                            currentNav = GarageNav.CAR_INFO
-                        }
-                    )
+                    if (car != null && vehicle != null) {
+                        CarDetailsScreen(
+                            car = car,
+                            vehicle = vehicle,
+                            onClose = { currentNav = GarageNav.LIST },
+                            onComponentClick = { component ->
+                                selectedComponent = component
+                                currentNav = GarageNav.CAR_INFO
+                            },
+                            onUpdateOdometer = {
+                                currentNav = GarageNav.UPDATE_ODOMETER
+                            }
+                        )
+                    }
                 }
             }
 
@@ -256,6 +256,23 @@ fun MyGarageApp(garageViewModel: GarageViewModel = viewModel()) {
                             currentNav = GarageNav.CAR_DETAILS
                         }
                     )
+                }
+            }
+
+            GarageNav.UPDATE_ODOMETER -> {
+                BackHandler { currentNav = GarageNav.CAR_DETAILS }
+                selectedCarId?.let { id ->
+                    val vehicle = garageViewModel.getVehiclebyid(id)
+                    vehicle?.let { v ->
+                        UpdateOdometerScreen(
+                            vehicle = v,
+                            onUpdate = { newOdo ->
+                                garageViewModel.updateOdometer(v.id, newOdo)
+                                currentNav = GarageNav.CAR_DETAILS
+                            },
+                            onCancel = { currentNav = GarageNav.CAR_DETAILS }
+                        )
+                    }
                 }
             }
         }
@@ -286,6 +303,54 @@ fun MyGarageApp(garageViewModel: GarageViewModel = viewModel()) {
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun UpdateOdometerScreen(
+    vehicle: Vehicle,
+    onUpdate: (Int) -> Unit,
+    onCancel: () -> Unit
+) {
+    var odoText by remember { mutableStateOf(vehicle.odometer.toString()) }
+
+    Column(
+        modifier = Modifier.fillMaxSize().background(Win98Gray).padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = "Update Odometer",
+            fontWeight = FontWeight.Bold,
+            fontSize = 18.sp,
+            color = Win98Black
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "Current: ${vehicle.odometer} miles",
+            fontSize = 14.sp,
+            color = Win98Black
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Win98TextField(
+            value = odoText,
+            onValueChange = { odoText = it },
+            placeholder = "Enter new mileage"
+        )
+        Spacer(modifier = Modifier.height(24.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)
+        ) {
+            Win98Button(text = "Cancel", onClick = onCancel)
+            Win98Button(
+                text = "Update",
+                enabled = odoText.toIntOrNull() != null,
+                onClick = {
+                    odoText.toIntOrNull()?.let { onUpdate(it) }
+                }
+            )
         }
     }
 }
@@ -449,7 +514,8 @@ fun CarDetailsScreen(
     car: GarageCar,
     onClose: () -> Unit,
     vehicle: Vehicle,
-    onComponentClick: (CarComponentInfo) -> Unit
+    onComponentClick: (CarComponentInfo) -> Unit,
+    onUpdateOdometer: () -> Unit
 ) {
 
     var showErrorDialog by remember { mutableStateOf(false) }
@@ -533,10 +599,7 @@ fun CarDetailsScreen(
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     val btnMod = Modifier.weight(1f).height(64.dp)
-                    CarActionButton(label = "UPDATE ODOMETER", iconRes = R.drawable.transmission, modifier = btnMod, onClick = {
-                        // TODO: Update to point to class for updating odometer
-                        onComponentClick(CarComponentInfo("Update Odometer", R.drawable.transmission))
-                    })
+                    CarActionButton(label = "UPDATE ODOMETER", iconRes = R.drawable.transmission, modifier = btnMod, onClick = onUpdateOdometer)
                     CarActionButton(label = "ADD SERVICE HISTORY", iconRes = R.drawable.engine, modifier = btnMod, onClick = {
                         onComponentClick(CarComponentInfo("Add Service History", R.drawable.engine))
                         // TODO: Add service history script

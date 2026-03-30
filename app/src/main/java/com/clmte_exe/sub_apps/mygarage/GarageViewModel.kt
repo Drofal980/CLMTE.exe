@@ -48,6 +48,28 @@ class GarageViewModel : ViewModel() {
         }
     }
 
+    fun updateOdometer(vehicleId: String, newOdometer: Int) {
+        viewModelScope.launch {
+            isLoading = true
+            try {
+                val vehicle = vehicles.find { it.id == vehicleId }
+                if (vehicle != null) {
+                    val updatedVehicle = vehicle.copy(odometer = newOdometer)
+                    firestoreManager.saveDocument(
+                        collection = "vehicles",
+                        documentId = vehicleId,
+                        data = updatedVehicle
+                    )
+                    loadCars() // Refresh the UI
+                }
+            } catch (e: Exception) {
+                // Handle error
+            } finally {
+                isLoading = false
+            }
+        }
+    }
+
     fun deleteCar(car: GarageCar) {
         cars.remove(car)
 
