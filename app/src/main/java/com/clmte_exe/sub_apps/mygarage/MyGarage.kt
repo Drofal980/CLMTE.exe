@@ -50,6 +50,7 @@ data class GarageCar(
     val id: String,
     val title: String,
     val imageRes: Int,
+    val backgroundRes: Int,
     val fullDetails: String
 )
 
@@ -268,6 +269,10 @@ fun MyGarageApp(garageViewModel: GarageViewModel = viewModel()) {
                             onFixError = { errorType ->
                                 predefinedServiceType = errorType
                                 currentNav = GarageNav.ADD_SERVICE_HISTORY
+                            },
+                            onFixAll = { serviceNames ->
+                                val today = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault()).format(Date())
+                                garageViewModel.fixAllErrors(vehicle.id, serviceNames, vehicle.odometer, today)
                             }
                         )
                     }
@@ -879,7 +884,8 @@ fun CarDetailsScreen(
     onComponentClick: (CarComponentInfo) -> Unit,
     onUpdateOdometer: () -> Unit,
     onServiceHistoryClick: () -> Unit,
-    onFixError: (String) -> Unit
+    onFixError: (String) -> Unit,
+    onFixAll: (List<String>) -> Unit
 ) {
 
     var showErrorDialog by remember { mutableStateOf(false) }
@@ -894,6 +900,7 @@ fun CarDetailsScreen(
         errors.size >= 5 -> R.drawable.hazy
         else -> R.drawable.sunny
     }
+
 
     Column(
         modifier = Modifier.fillMaxSize().background(Win98Gray)
@@ -996,12 +1003,37 @@ fun CarDetailsScreen(
                         .background(Win98Blue)
                         .win98Border(false)
                         .padding(4.dp)
-                ) {Text(
-                    text = "Inspection Errors",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp,
-                    color = Color.White
-                )}
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Inspection Errors (${errors.size})",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp,
+                            color = Color.White
+                        )
+                        
+                        // Fix All Button
+                        if (errors.size > 1) {
+                            Box(
+                                modifier = Modifier
+                                    .background(Win98Gray)
+                                    .win98Border(false)
+                                    .clickable {
+                                        showErrorDialog = false
+                                        val serviceNames = errors.map { it.substringBefore(":") }
+                                        onFixAll(serviceNames)
+                                    }
+                                    .padding(horizontal = 8.dp, vertical = 2.dp)
+                            ) {
+                                Text("New Car / Fixed All", color = Win98Black, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    }
+                }
 
                 // Back button for dialog
                 Box(
@@ -1037,7 +1069,7 @@ fun CarDetailsScreen(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .background(Color.White)
-                                        .win98Border(pressed = true)
+                                        .win98Border(true)
                                         .padding(8.dp),
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.CenterVertically

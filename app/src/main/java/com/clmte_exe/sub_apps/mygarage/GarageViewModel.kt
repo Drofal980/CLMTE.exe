@@ -93,6 +93,32 @@ class GarageViewModel : ViewModel() {
         }
     }
 
+    fun fixAllErrors(vehicleId: String, serviceNames: List<String>, odometer: Int, date: String) {
+        viewModelScope.launch {
+            isLoading = true
+            try {
+                val vehicle = vehicles.find { it.id == vehicleId }
+                if (vehicle != null) {
+                    val newLogs = serviceNames.map { name ->
+                        ServiceLog(date = date, description = name, mileage = odometer)
+                    }
+                    val updatedHistory = vehicle.service_history + newLogs
+                    val updatedVehicle = vehicle.copy(service_history = updatedHistory)
+                    firestoreManager.saveDocument(
+                        collection = "vehicles",
+                        documentId = vehicleId,
+                        data = updatedVehicle
+                    )
+                    loadCars()
+                }
+            } catch (e: Exception) {
+                // Handle error
+            } finally {
+                isLoading = false
+            }
+        }
+    }
+
     fun deleteServiceLog(vehicleId: String, serviceLog: ServiceLog) {
         viewModelScope.launch {
             isLoading = true
@@ -150,11 +176,19 @@ class GarageViewModel : ViewModel() {
 
                     val template = carTemplates[type] ?: carTemplates[CarType.SEDAN]!!
 
+                    val errorCount = InspectionManager.getInspectionErrors(vehicle).size
+                    val backgroundRes = when {
+                        errorCount >= 15 -> R.drawable.rainy
+                        errorCount >= 5 -> R.drawable.hazy
+                        else -> R.drawable.sunny
+                    }
+
                     cars.add(
                         GarageCar(
                             id = vehicle.id,
                             title = vehicle.nickname.ifBlank { "${vehicle.year} ${vehicle.make} ${vehicle.model}" },
                             imageRes = template.imageRes,
+                            backgroundRes = backgroundRes,
                             fullDetails = buildString {
                                 appendLine("Type: ${vehicle.vehicle_type}")
                                 appendLine("Make: ${vehicle.make}")
