@@ -91,9 +91,9 @@ To recreate the development environment, you need the following software and/or 
 
 I found these websites useful in developing this software:
 
-* [Learning Kotlin]([https://www.geeksforgeeks.org/android/android-creating-a-calendar-view-app/](https://nodejs.org/en/learn/getting-started/introduction-to-nodejs)](https://kotlinlang.org/docs/kotlin-tour-hello-world.html#variables))
-* [Learning Jetpack Compose]([https://developer.android.com/kotlin/campaign/learn](https://www.geeksforgeeks.org/css/css-cheat-sheet-a-basic-guide-to-css/)](https://www.geeksforgeeks.org/android/android-jetpack-compose-tutorial/))
-* [Android Studios]([https://developer.android.com/studio](https://www.geeksforgeeks.org/html/html-cheat-sheet/)](https://developer.android.com/studio))
+* [Learning Kotlin]([[https://www.geeksforgeeks.org/android/android-creating-a-calendar-view-app/](https://nodejs.org/en/learn/getting-started/introduction-to-nodejs)](https://kotlinlang.org/docs/kotlin-tour-hello-world.html#variables))
+* [Learning Jetpack Compose]([[https://developer.android.com/kotlin/campaign/learn](https://www.geeksforgeeks.org/css/css-cheat-sheet-a-basic-guide-to-css/)](https://www.geeksforgeeks.org/android/android-jetpack-compose-tutorial/))
+* [Android Studios]([[https://developer.android.com/studio](https://www.geeksforgeeks.org/html/html-cheat-sheet/)](https://developer.android.com/studio))
 
 ## Future Work
 
