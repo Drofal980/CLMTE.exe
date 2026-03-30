@@ -21,6 +21,34 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.sp
 import com.clmte_exe.app.R
 import com.clmte_exe.sub_apps.settings.ThemeManager
+import androidx.compose.ui.draw.drawWithContent
+
+val Win98Gray: Color get() = if (ThemeManager.isDarkMode) Color(0xFF3A3A3A) else Color(0xFFC0C0C0)
+val Win98Blue: Color get() = if (ThemeManager.isDarkMode) Color(0xFF1A1A5C) else Color(0xFF000080)
+val Win98White: Color get() = if (ThemeManager.isDarkMode) Color(0xFF5A5A5A) else Color.White
+val Win98DarkGray: Color get() = if (ThemeManager.isDarkMode) Color(0xFF2A2A2A) else Color(0xFF808080)
+val Win98Black: Color get() = if (ThemeManager.isDarkMode) Color(0xFFE0E0E0) else Color(0xFF000000)
+
+fun Modifier.win98Border(pressed: Boolean): Modifier = this.drawWithContent {
+    drawContent()
+    val stroke = 1.dp.toPx()
+    val w = size.width
+    val h = size.height
+    val topLeftColor = if (pressed) Win98Black else Win98White
+    val bottomRightColor = if (pressed) Win98White else Win98Black
+    val shadowColor = Win98DarkGray
+    drawLine(topLeftColor, Offset(0f, stroke / 2), Offset(w, stroke / 2), stroke)
+    drawLine(topLeftColor, Offset(stroke / 2, 0f), Offset(stroke / 2, h), stroke)
+    drawLine(bottomRightColor, Offset(0f, h - stroke / 2), Offset(w, h - stroke / 2), stroke)
+    drawLine(bottomRightColor, Offset(w - stroke / 2, 0f), Offset(w - stroke / 2, h), stroke)
+    if (!pressed) {
+        drawLine(shadowColor, Offset(stroke, h - stroke * 1.5f), Offset(w - stroke, h - stroke * 1.5f), stroke)
+        drawLine(shadowColor, Offset(w - stroke * 1.5f, stroke), Offset(w - stroke * 1.5f, h - stroke), stroke)
+    } else {
+        drawLine(shadowColor, Offset(stroke, stroke * 1.5f), Offset(w - stroke, stroke * 1.5f), stroke)
+        drawLine(shadowColor, Offset(stroke * 1.5f, stroke), Offset(stroke * 1.5f, h - stroke), stroke)
+    }
+}
 
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
@@ -89,9 +117,8 @@ fun Win98WindowContent(
     onMaximize: () -> Unit,
     content: @Composable () -> Unit
 ) {
-    val isDark = ThemeManager.isDarkMode
-    val windowBg = if (isDark) Color(0xFF3A3A3A) else Color(0xFFC0C0C0)
-    val titleBarBg = if (isDark) Color(0xFF1A1A5C) else Color(0xFF000080)
+    val windowBg = Win98Gray
+    val titleBarBg = Win98Blue
 
     Column(
         modifier = Modifier
@@ -164,6 +191,3 @@ fun Win98WindowContent(
         }
     }
 }
-
-
-

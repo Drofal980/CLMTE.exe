@@ -7,6 +7,10 @@ import androidx.compose.ui.graphics.Color
 
 object ThemeManager {
     var isDarkMode by mutableStateOf(false)
+    var uiFontSizeSp by mutableStateOf(14f)
+
+    val uiFontScale: Float
+        get() = (uiFontSizeSp / 14f).coerceIn(0.75f, 1.6f)
 
     // Desktop wallpaper: teal in light, dark teal in dark mode
     val desktopBackground: Color

@@ -64,45 +64,63 @@ fun AddCarScreen(
             color = Win98Black
         )
 
-        Row(
+        val rows = CarType.entries.chunked(3)
+        Column(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            CarType.entries.forEach { type ->
-                val isSelected = selectedType == type
-                val interactionSource = remember { MutableInteractionSource() }
-                val isPressed by interactionSource.collectIsPressedAsState()
-
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier
-                        .weight(1f)
-                        .background(if (isSelected) Win98Blue else Win98Gray)
-                        .win98Border(pressed = isPressed || isSelected)
-                        .clickable(
-                            interactionSource = interactionSource,
-                            indication = null
-                        ) { selectedType = type }
-                        .padding(8.dp)
+            rows.forEach { rowItems ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Image(
-                        painter = painterResource(
-                            carTemplates[type]?.imageRes ?: R.drawable.sedan
-                        ),
-                        contentDescription = type.label,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(50.dp)
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = type.label,
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = if (isSelected) Win98White else Win98Black,
-                        textAlign = TextAlign.Center
-                    )
+                    rowItems.forEach { type ->
+                        val isSelected = selectedType == type
+                        val interactionSource = remember { MutableInteractionSource() }
+                        val isPressed by interactionSource.collectIsPressedAsState()
+
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier
+                                .weight(1f)
+                                .background(if (isSelected) Win98Blue else Win98Gray)
+                                .win98Border(pressed = isPressed || isSelected)
+                                .clickable(
+                                    interactionSource = interactionSource,
+                                    indication = null
+                                ) { selectedType = type }
+                                .padding(8.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(50.dp)
+                            ) {
+                                Image(
+                                    painter = painterResource(
+                                        carTemplates[type]?.imageRes ?: R.drawable.sedan
+                                    ),
+                                    contentDescription = type.label,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = type.label,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = if (isSelected) Win98White else Win98Black,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+                    // Fill row if not full
+                    if (rowItems.size < 3) {
+                        repeat(3 - rowItems.size) {
+                            Spacer(modifier = Modifier.weight(1f))
+                        }
+                    }
                 }
             }
         }
