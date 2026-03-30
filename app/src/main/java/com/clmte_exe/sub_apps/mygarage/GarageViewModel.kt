@@ -29,10 +29,10 @@ class GarageViewModel : ViewModel() {
             isLoading = true
             try {
                 val vehicleId = UUID.randomUUID().toString()
-                
-                // Create a copy of the vehicle with the new ID if the data class supported it, 
+
+                // Create a copy of the vehicle with the new ID if the data class supported it,
                 // but since it's a val id we pass it to saveDocument.
-                
+
                 firestoreManager.saveDocument(
                     collection = "vehicles",
                     documentId = vehicleId,
@@ -44,7 +44,7 @@ class GarageViewModel : ViewModel() {
                 } catch (e: Exception) {
                     CarType.SEDAN
                 }
-                
+
                 val template = carTemplates[type] ?: carTemplates[CarType.SEDAN]!!
 
                 val car = GarageCar(
@@ -84,6 +84,7 @@ class GarageViewModel : ViewModel() {
                 documentId = car.id
             )
         }
+        loadCars()
     }
 
     // Load in the cars from firebase
@@ -143,7 +144,10 @@ class GarageViewModel : ViewModel() {
 enum class CarType(val label: String) {
     SEDAN("Sedan"),
     SUV("SUV"),
-    TRUCK("Truck")
+    TRUCK("Truck"),
+    MINIVAN("Minivan"),
+    MOTORCYCLE("Motorcycle"),
+    HATCHBACK("Hatchback")
 }
 
 data class CarTemplate(
@@ -159,5 +163,14 @@ val carTemplates = mapOf(
     ),
     CarType.TRUCK to CarTemplate(
         imageRes = R.drawable.truck,
+    ),
+    CarType.MINIVAN to CarTemplate(
+        imageRes = R.drawable.minivan,
+    ),
+    CarType.MOTORCYCLE to CarTemplate(
+        imageRes = R.drawable.motorcycle,
+    ),
+    CarType.HATCHBACK to CarTemplate(
+        imageRes = R.drawable.hatchback,
     )
 )

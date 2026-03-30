@@ -1,9 +1,12 @@
 package com.clmte_exe.sub_apps
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Slider
@@ -17,10 +20,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.TextUnit
+import com.clmte_exe.app.R
+import com.clmte_exe.app.chatbot.GarageChatBotScreen
 import com.clmte_exe.sub_apps.settings.ThemeManager
 import com.clmte_exe.sub_apps.mygarage.Win98Black
 import com.clmte_exe.sub_apps.mygarage.Win98Blue
@@ -145,7 +151,6 @@ fun SettingsApp() {
             Spacer(Modifier.height(4.dp))
             Text("Version: 1.0.0", color = appText, fontSize = (fontSize - 1).sp)
             Text("clmte.exe", color = appText, fontSize = (fontSize - 1).sp)
-            Text("Developers: ", color = appText, fontSize = (fontSize - 1).sp)
 
         }
     }
@@ -245,11 +250,75 @@ fun CalculatorApp() {
 
 @Composable
 fun MyComputerApp() {
-    Column(modifier = Modifier.fillMaxSize().background(appBg).padding(16.dp)) {
-        Text("My Computer", color = appText, fontWeight = FontWeight.Bold)
-        Spacer(Modifier.height(12.dp))
-        Text("C:", color = appText)
-        Text("A:", color = appText)
+    data class Developer(
+        val name: String,
+        val role: String,
+        val imageRes: Int
+    )
+
+    val developers = listOf(
+        Developer("Brandon", "Application Development Manager and Structure Engineer", R.drawable.brandon),
+        Developer("Emily", "Full Stack Developer and Solutions Architect", R.drawable.emily),
+        Developer("Austin", "Backend Developer and Database Engineer", R.drawable.austin),
+        Developer("Dias", "Frontend Developer and Asset Manager", R.drawable.dias)
+    )
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(appBg)
+            .padding(16.dp)
+    ) {
+        Text(
+            text = "Developers",
+            color = appText,
+            fontWeight = FontWeight.Bold,
+            fontSize = ThemeManager.uiFontSizeSp.sp
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            items(developers) { developer ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(appSectionBg)
+                        .win98Border(pressed = false)
+                        .padding(10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Image(
+                        painter = painterResource(id = developer.imageRes),
+                        contentDescription = developer.name,
+                        modifier = Modifier
+                            .size(96.dp)
+                            .background(Win98Gray)
+                            .win98Border(pressed = false)
+                    )
+
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    Column {
+                        Text(
+                            text = developer.name,
+                            color = appText,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = ThemeManager.uiFontSizeSp.sp
+                        )
+
+                        Text(
+                            text = developer.role,
+                            color = if (ThemeManager.isDarkMode) Color.LightGray else Color.DarkGray,
+                            fontSize = (ThemeManager.uiFontSizeSp - 2).sp
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -268,8 +337,6 @@ fun MyGarageApp() {
 }
 
 @Composable
-fun InternetExplorerApp() {
-    Column(modifier = Modifier.fillMaxSize().background(appBg).padding(16.dp)) {
-        Text("AI Assistant", color = appText, fontWeight = FontWeight.Bold)
-    }
+fun AiAssistantApp() {
+    GarageChatBotScreen()
 }

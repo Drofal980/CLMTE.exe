@@ -23,7 +23,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -38,7 +37,7 @@ fun TodoColumn(
     items: List<TodoItem>,
     onItemClick: (TodoItem) -> Unit,
     onDragStart: (TodoItem, Offset) -> Unit,
-    onDrag: (PointerInputChange, Offset) -> Unit,
+    onDrag: (androidx.compose.ui.input.pointer.PointerInputChange, Offset) -> Unit,
     onDragEnd: () -> Unit
 ) {
     Column(

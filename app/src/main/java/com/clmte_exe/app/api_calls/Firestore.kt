@@ -33,6 +33,21 @@ class FirestoreManager {
         return snapshot.toObject(T::class.java)
     }
 
+    suspend inline fun <reified T : Any> getDocumentsByField(
+        collection: String,
+        field: String,
+        value: Any
+    ): List<T> {
+        val snapshot = db.collection(collection)
+            .whereEqualTo(field, value)
+            .get()
+            .await()
+
+        return snapshot.documents.mapNotNull {
+            it.toObject(T::class.java)
+        }
+    }
+
     suspend fun <T> saveDocument(
         collection: String,
         documentId: String,
