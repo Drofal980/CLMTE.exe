@@ -39,36 +39,9 @@ class GarageViewModel : ViewModel() {
                     data = vehicle.copy(id = vehicleId)
                 )
 
-                val type = try {
-                    CarType.valueOf(vehicle.vehicle_type.uppercase())
-                } catch (e: Exception) {
-                    CarType.SEDAN
-                }
-
-                val template = carTemplates[type] ?: carTemplates[CarType.SEDAN]!!
-
-                val car = GarageCar(
-                    id = vehicleId,
-                    title = vehicle.nickname.ifBlank {
-                        "${vehicle.year} ${vehicle.make} ${vehicle.model}"
-                    },
-                    imageRes = template.imageRes,
-                    fullDetails = buildString {
-                        appendLine("Type: ${vehicle.vehicle_type}")
-                        appendLine("Make: ${vehicle.make}")
-                        appendLine("Model: ${vehicle.model}")
-                        appendLine("Year: ${vehicle.year}")
-                        appendLine("VIN: ${vehicle.vin_number}")
-                        appendLine("Drive Type: ${vehicle.drive_type}")
-                        appendLine("Transmission: ${vehicle.transmission}")
-                        appendLine("Odometer: ${vehicle.odometer}")
-                        if (vehicle.notes.isNotEmpty()) {
-                            appendLine("Notes: ${vehicle.notes.joinToString()}")
-                        }
-                        appendLine()
-                    }
-                )
-                cars.add(car)
+                // Refresh the list from the source of truth (Firestore) 
+                // to avoid manual synchronization issues and duplicates.
+                loadCars()
             } finally {
                 isLoading = false
             }

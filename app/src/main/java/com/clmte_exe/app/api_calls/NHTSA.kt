@@ -60,6 +60,7 @@ class NhtsaApi {
         val normalizedBodyClass = when {
             rawBodyClass?.contains("pickup", ignoreCase = true) == true || rawBodyClass?.contains("truck", ignoreCase = true) == true -> "Truck"
             rawBodyClass?.contains("suv", ignoreCase = true) == true || rawBodyClass?.contains("sport utility", ignoreCase = true) == true || rawBodyClass?.contains("crossover", ignoreCase = true) == true -> "SUV"
+            rawBodyClass?.contains("minivan", ignoreCase = true) == true || rawBodyClass?.contains("van", ignoreCase = true) == true  -> "Minivan"
             else -> "Sedan"
         }
 
