@@ -70,6 +70,52 @@ class GarageViewModel : ViewModel() {
         }
     }
 
+    fun addServiceLog(vehicleId: String, serviceLog: ServiceLog) {
+        viewModelScope.launch {
+            isLoading = true
+            try {
+                val vehicle = vehicles.find { it.id == vehicleId }
+                if (vehicle != null) {
+                    val updatedHistory = vehicle.service_history + serviceLog
+                    val updatedVehicle = vehicle.copy(service_history = updatedHistory)
+                    firestoreManager.saveDocument(
+                        collection = "vehicles",
+                        documentId = vehicleId,
+                        data = updatedVehicle
+                    )
+                    loadCars() // Refresh the UI
+                }
+            } catch (e: Exception) {
+                // Handle error
+            } finally {
+                isLoading = false
+            }
+        }
+    }
+
+    fun deleteServiceLog(vehicleId: String, serviceLog: ServiceLog) {
+        viewModelScope.launch {
+            isLoading = true
+            try {
+                val vehicle = vehicles.find { it.id == vehicleId }
+                if (vehicle != null) {
+                    val updatedHistory = vehicle.service_history.filter { it != serviceLog }
+                    val updatedVehicle = vehicle.copy(service_history = updatedHistory)
+                    firestoreManager.saveDocument(
+                        collection = "vehicles",
+                        documentId = vehicleId,
+                        data = updatedVehicle
+                    )
+                    loadCars() // Refresh the UI
+                }
+            } catch (e: Exception) {
+                // Handle error
+            } finally {
+                isLoading = false
+            }
+        }
+    }
+
     fun deleteCar(car: GarageCar) {
         cars.remove(car)
 
