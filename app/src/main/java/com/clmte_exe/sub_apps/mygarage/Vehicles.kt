@@ -14,7 +14,8 @@ data class Vehicle(
     val vin_number: String = "",
     val drive_type: String = "",
     val transmission: String = "",
-    val notes: List<String> = emptyList()
+    val notes: List<String> = emptyList(),
+    val service_history: List<ServiceLog> = emptyList()
 )
 
 data class ServiceLog(

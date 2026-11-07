@@ -33,7 +33,7 @@ val allApps = listOf(
 
     Win98App(
         id = "mycomputer",
-        title = "My Computer",
+        title = "Developers",
         iconRes = R.drawable.my_computer,
         type = AppType.SYSTEM
     ) {
@@ -74,7 +74,7 @@ val allApps = listOf(
         iconRes = R.drawable.ai,
         type = AppType.SYSTEM
     ) {
-        InternetExplorerApp()
+        AiAssistantApp()
     },
 
     Win98App(

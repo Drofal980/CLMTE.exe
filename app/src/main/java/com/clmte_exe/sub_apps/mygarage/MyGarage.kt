@@ -9,6 +9,8 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -32,14 +34,23 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDatePickerState
+import com.clmte_exe.app.obj_classes.MaintenanceRules
 import com.clmte_exe.sub_apps.mygarage.InspectionManager
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
 
 data class GarageCar(
     val id: String,
     val title: String,
     val imageRes: Int,
+    val backgroundRes: Int,
     val fullDetails: String
 )
 
@@ -49,7 +60,7 @@ val Win98White: Color get() = if (ThemeManager.isDarkMode) Color(0xFF5A5A5A) els
 val Win98DarkGray: Color get() = if (ThemeManager.isDarkMode) Color(0xFF2A2A2A) else Color(0xFF808080)
 val Win98Black: Color get() = if (ThemeManager.isDarkMode) Color(0xFFE0E0E0) else Color(0xFF000000)
 
-enum class GarageNav { LIST, ADD_CHOICE, VIN_LOOKUP, ADD_CAR, CAR_DETAILS, CAR_INFO }
+enum class GarageNav { LIST, ADD_CHOICE, VIN_LOOKUP, ADD_CAR, CAR_DETAILS, CAR_INFO, UPDATE_ODOMETER, ADD_SERVICE_HISTORY, SERVICE_HISTORY }
 
 data class CarComponentInfo(val label: String, val iconRes: Int)
 
@@ -61,9 +72,10 @@ fun MyGarageApp(garageViewModel: GarageViewModel = viewModel()) {
     }
 
     var currentNav by remember { mutableStateOf(GarageNav.LIST) }
-    var selectedCar by remember { mutableStateOf<GarageCar?>(null) }
+    var selectedCarId by remember { mutableStateOf<String?>(null) }
     var selectedComponent by remember { mutableStateOf<CarComponentInfo?>(null) }
     var vehicleToEdit by remember { mutableStateOf<Vehicle?>(null) }
+    var predefinedServiceType by remember { mutableStateOf<String?>(null) }
 
     var trashPosition by remember { mutableStateOf<Offset?>(null) }
     var isDragging by remember { mutableStateOf(false) }
@@ -106,10 +118,19 @@ fun MyGarageApp(garageViewModel: GarageViewModel = viewModel()) {
                             modifier = Modifier.fillMaxSize()
                         ) {
                             items(garageViewModel.cars) { car ->
+                                val vehicle = garageViewModel.getVehiclebyid(car.id)
+                                val errorCount = vehicle?.let { InspectionManager.getInspectionErrors(it).size } ?: 0
+
+                                val backgroundImg = when {
+                                    errorCount >= 10 -> R.drawable.rainy
+                                    errorCount >= 5 -> R.drawable.hazy
+                                    else -> R.drawable.sunny
+                                }
                                 GarageCarCard(
                                     car = car,
+                                    backgroundImg = backgroundImg,
                                     onCardClick = {
-                                        selectedCar = car
+                                        selectedCarId = car.id
                                         currentNav = GarageNav.CAR_DETAILS
                                     },
                                     onDelete = {
@@ -226,20 +247,35 @@ fun MyGarageApp(garageViewModel: GarageViewModel = viewModel()) {
             GarageNav.CAR_DETAILS -> {
                 BackHandler { currentNav = GarageNav.LIST }
 
-                selectedCar?.let { car ->
+                selectedCarId?.let { id ->
+                    val car = garageViewModel.cars.find { it.id == id }
+                    val vehicle = garageViewModel.getVehiclebyid(id)
 
-                    val vehicle = garageViewModel.getVehiclebyid(car.id)
-
-
-                    CarDetailsScreen(
-                        car = car,
-                        vehicle = vehicle ?: return@let,
-                        onClose = { currentNav = GarageNav.LIST },
-                        onComponentClick = { component ->
-                            selectedComponent = component
-                            currentNav = GarageNav.CAR_INFO
-                        }
-                    )
+                    if (car != null && vehicle != null) {
+                        CarDetailsScreen(
+                            car = car,
+                            vehicle = vehicle,
+                            onClose = { currentNav = GarageNav.LIST },
+                            onComponentClick = { component ->
+                                selectedComponent = component
+                                currentNav = GarageNav.CAR_INFO
+                            },
+                            onUpdateOdometer = {
+                                currentNav = GarageNav.UPDATE_ODOMETER
+                            },
+                            onServiceHistoryClick = {
+                                currentNav = GarageNav.SERVICE_HISTORY
+                            },
+                            onFixError = { errorType ->
+                                predefinedServiceType = errorType
+                                currentNav = GarageNav.ADD_SERVICE_HISTORY
+                            },
+                            onFixAll = { serviceNames ->
+                                val today = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault()).format(Date())
+                                garageViewModel.fixAllErrors(vehicle.id, serviceNames, vehicle.odometer, today)
+                            }
+                        )
+                    }
                 }
             }
 
@@ -256,6 +292,68 @@ fun MyGarageApp(garageViewModel: GarageViewModel = viewModel()) {
                             currentNav = GarageNav.CAR_DETAILS
                         }
                     )
+                }
+            }
+
+            GarageNav.UPDATE_ODOMETER -> {
+                BackHandler { currentNav = GarageNav.CAR_DETAILS }
+                selectedCarId?.let { id ->
+                    val vehicle = garageViewModel.getVehiclebyid(id)
+                    vehicle?.let { v ->
+                        UpdateOdometerScreen(
+                            vehicle = v,
+                            onUpdate = { newOdo ->
+                                garageViewModel.updateOdometer(v.id, newOdo)
+                                currentNav = GarageNav.CAR_DETAILS
+                            },
+                            onCancel = { currentNav = GarageNav.CAR_DETAILS }
+                        )
+                    }
+                }
+            }
+
+            GarageNav.ADD_SERVICE_HISTORY -> {
+                BackHandler {
+                    predefinedServiceType = null
+                    currentNav = if (predefinedServiceType != null) GarageNav.CAR_DETAILS else GarageNav.SERVICE_HISTORY
+                }
+                selectedCarId?.let { id ->
+                    val vehicle = garageViewModel.getVehiclebyid(id)
+                    vehicle?.let { v ->
+                        AddServiceHistoryScreen(
+                            vehicle = v,
+                            initialServiceType = predefinedServiceType,
+                            onSave = { serviceLog ->
+                                garageViewModel.addServiceLog(v.id, serviceLog)
+                                val nextNav = if (predefinedServiceType != null) GarageNav.CAR_DETAILS else GarageNav.SERVICE_HISTORY
+                                predefinedServiceType = null
+                                currentNav = nextNav
+                            },
+                            onCancel = {
+                                val nextNav = if (predefinedServiceType != null) GarageNav.CAR_DETAILS else GarageNav.SERVICE_HISTORY
+                                predefinedServiceType = null
+                                currentNav = nextNav
+                            }
+                        )
+                    }
+                }
+            }
+
+            GarageNav.SERVICE_HISTORY -> {
+                BackHandler { currentNav = GarageNav.CAR_DETAILS }
+                selectedCarId?.let { id ->
+                    val vehicle = garageViewModel.getVehiclebyid(id)
+                    vehicle?.let { v ->
+                        ServiceHistoryScreen(
+                            vehicle = v,
+                            onAddLog = {
+                                predefinedServiceType = null
+                                currentNav = GarageNav.ADD_SERVICE_HISTORY
+                            },
+                            onDeleteLog = { log -> garageViewModel.deleteServiceLog(v.id, log) },
+                            onBack = { currentNav = GarageNav.CAR_DETAILS }
+                        )
+                    }
                 }
             }
         }
@@ -286,6 +384,334 @@ fun MyGarageApp(garageViewModel: GarageViewModel = viewModel()) {
                     )
                 }
             }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ServiceHistoryScreen(
+    vehicle: Vehicle,
+    onAddLog: () -> Unit,
+    onDeleteLog: (ServiceLog) -> Unit,
+    onBack: () -> Unit
+) {
+    var logToDelete by remember { mutableStateOf<ServiceLog?>(null) }
+
+    if (logToDelete != null) {
+        BasicAlertDialog(onDismissRequest = { logToDelete = null }) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(4.dp)
+                    .background(Win98Gray)
+                    .win98Border(true)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Win98Blue)
+                        .padding(4.dp)
+                ) {
+                    Text("Delete Log Entry?", color = Color.White, fontWeight = FontWeight.Bold)
+                }
+                Spacer(Modifier.height(12.dp))
+                Text(
+                    "Are you sure you want to delete this service record?",
+                    color = Win98Black,
+                    modifier = Modifier.padding(12.dp)
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(8.dp),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    TextButton(onClick = { logToDelete = null }) {
+                        Text("Cancel", color = Win98Black)
+                    }
+                    TextButton(onClick = {
+                        onDeleteLog(logToDelete!!)
+                        logToDelete = null
+                    }) {
+                        Text("Delete", color = Color.Red, fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
+        }
+    }
+
+    Column(
+        modifier = Modifier.fillMaxSize().background(Win98Gray)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().height(36.dp).background(Win98Blue).padding(horizontal = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.size(24.dp).background(Win98Gray).win98Border(pressed = false).clickable(onClick = onBack)
+            ) {
+                Image(
+                    painter = painterResource(R.drawable.backarrow),
+                    contentDescription = "backarrow",
+                    modifier = Modifier.size(20.dp),
+                )
+            }
+            Text(text = "Service History: ${vehicle.nickname}", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp, modifier = Modifier.weight(1f))
+            
+            // Add Log button
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.size(24.dp).background(Win98Gray).win98Border(pressed = false).clickable(onClick = onAddLog)
+            ) {
+                Text("+", fontWeight = FontWeight.Bold, color = Win98Black)
+            }
+        }
+
+        if (vehicle.service_history.isEmpty()) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text(text = "No service history found.", color = Win98Black, fontSize = 14.sp)
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize().padding(12.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(vehicle.service_history.reversed()) { log ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(Win98White)
+                            .win98Border(false)
+                            .padding(10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(text = log.description, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = Win98Black)
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                Text(text = "Date: ${log.date}", fontSize = 12.sp, color = Win98Black)
+                                Text(text = "Mileage: ${log.mileage}", fontSize = 12.sp, color = Win98Black)
+                            }
+                        }
+                        
+                        Spacer(modifier = Modifier.width(8.dp))
+                        
+                        // Delete Button
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier
+                                .size(24.dp)
+                                .background(Color(0xFFE0E0E0))
+                                .win98Border(false)
+                                .clickable { logToDelete = log }
+                        ) {
+                            Text("X", color = Color.Red, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun UpdateOdometerScreen(
+    vehicle: Vehicle,
+    onUpdate: (Int) -> Unit,
+    onCancel: () -> Unit
+) {
+    var odoText by remember { mutableStateOf(vehicle.odometer.toString()) }
+
+    Column(
+        modifier = Modifier.fillMaxSize().background(Win98Gray).padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = "Update Odometer",
+            fontWeight = FontWeight.Bold,
+            fontSize = 18.sp,
+            color = Win98Black
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "Current: ${vehicle.odometer} miles",
+            fontSize = 14.sp,
+            color = Win98Black
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Win98TextField(
+            value = odoText,
+            onValueChange = { odoText = it },
+            placeholder = "Enter new mileage"
+        )
+        Spacer(modifier = Modifier.height(24.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)
+        ) {
+            Win98Button(text = "Cancel", onClick = onCancel)
+            Win98Button(
+                text = "Update",
+                enabled = odoText.toIntOrNull() != null,
+                onClick = {
+                    odoText.toIntOrNull()?.let { onUpdate(it) }
+                }
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AddServiceHistoryScreen(
+    vehicle: Vehicle,
+    initialServiceType: String? = null,
+    onSave: (ServiceLog) -> Unit,
+    onCancel: () -> Unit
+) {
+    val serviceRules = remember { MaintenanceRules().getRules() }
+    var expanded by remember { mutableStateOf(false) }
+    
+    // Set initial service type if provided (e.g. from "Fix" button)
+    var selectedServiceName by remember { 
+        mutableStateOf(initialServiceType ?: serviceRules.first().name) 
+    }
+    
+    var mileageText by remember { mutableStateOf(vehicle.odometer.toString()) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    val datePickerState = rememberDatePickerState()
+    var showDatePicker by remember { mutableStateOf(false) }
+    var selectedDateText by remember { mutableStateOf("") }
+
+    if (showDatePicker) {
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    datePickerState.selectedDateMillis?.let {
+                        val sdf = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
+                        sdf.timeZone = TimeZone.getTimeZone("UTC")
+                        selectedDateText = sdf.format(Date(it))
+                    }
+                    showDatePicker = false
+                }) {
+                    Text("OK", color = Win98Blue)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false }) {
+                    Text("Cancel", color = Win98Black)
+                }
+            }
+        ) {
+            DatePicker(state = datePickerState)
+        }
+    }
+
+    Column(
+        modifier = Modifier.fillMaxSize().background(Win98Gray).padding(16.dp),
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Text(
+            text = "Add Service History",
+            fontWeight = FontWeight.Bold,
+            fontSize = 18.sp,
+            color = Win98Black
+        )
+
+        Column {
+            Text(text = "Select Service:", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = Win98Black)
+            Spacer(modifier = Modifier.height(4.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(36.dp)
+                    .background(Color.White)
+                    .win98Border(pressed = true)
+                    .clickable { expanded = true }
+                    .padding(horizontal = 8.dp),
+                contentAlignment = Alignment.CenterStart
+            ) {
+                Text(text = selectedServiceName, fontSize = 13.sp, color = Win98Black)
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false },
+                    modifier = Modifier.fillMaxWidth(0.8f).background(Win98Gray).win98Border(false)
+                ) {
+                    serviceRules.forEach { rule ->
+                        DropdownMenuItem(
+                            text = { Text(rule.name, color = Win98Black) },
+                            onClick = {
+                                selectedServiceName = rule.name
+                                expanded = false
+                            }
+                        )
+                    }
+                }
+            }
+        }
+
+        Column {
+            Text(text = "Date:", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = Win98Black)
+            Spacer(modifier = Modifier.height(4.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(36.dp)
+                    .background(Color.White)
+                    .win98Border(pressed = true)
+                    .clickable { showDatePicker = true }
+                    .padding(horizontal = 8.dp),
+                contentAlignment = Alignment.CenterStart
+            ) {
+                Text(
+                    text = selectedDateText.ifBlank { "Select Date" },
+                    fontSize = 13.sp,
+                    color = if (selectedDateText.isBlank()) Win98DarkGray else Win98Black
+                )
+            }
+        }
+
+        Column {
+            Text(text = "Mileage at Service:", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = Win98Black)
+            Spacer(modifier = Modifier.height(4.dp))
+            Win98TextField(value = mileageText, onValueChange = { mileageText = it }, placeholder = "e.g. 50000")
+        }
+
+        errorMessage?.let {
+            Text(text = it, color = Color.Red, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+        }
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
+        ) {
+            Win98Button(text = "Cancel", onClick = onCancel)
+            Win98Button(
+                text = "Save",
+                enabled = selectedDateText.isNotBlank() && mileageText.toIntOrNull() != null,
+                onClick = {
+                    val mileage = mileageText.toIntOrNull() ?: 0
+                    if (mileage > vehicle.odometer) {
+                        errorMessage = "Service mileage cannot be greater than current odometer (${vehicle.odometer} miles)."
+                    } else {
+                        errorMessage = null
+                        onSave(
+                            ServiceLog(
+                                date = selectedDateText,
+                                description = selectedServiceName,
+                                mileage = mileage
+                            )
+                        )
+                    }
+                }
+            )
         }
     }
 }
@@ -362,6 +788,7 @@ fun Win98FabButton(onClick: () -> Unit) {
 @Composable
 fun GarageCarCard(
     car: GarageCar,
+    backgroundImg: Int,
     onCardClick: () -> Unit,
     onDelete: (GarageCar) -> Unit,
     onDrop: (Offset) -> Unit,
@@ -419,11 +846,16 @@ fun GarageCarCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(140.dp)
-                .background(Color.White)
                 .win98Border(pressed = true)
                 .clickable(onClick = onCardClick)
                 .padding(2.dp)
         ) {
+            Image(
+                painter = painterResource(backgroundImg),
+                contentDescription = car.title,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
             Image(
                 painter = painterResource(car.imageRes),
                 contentDescription = car.title,
@@ -449,7 +881,11 @@ fun CarDetailsScreen(
     car: GarageCar,
     onClose: () -> Unit,
     vehicle: Vehicle,
-    onComponentClick: (CarComponentInfo) -> Unit
+    onComponentClick: (CarComponentInfo) -> Unit,
+    onUpdateOdometer: () -> Unit,
+    onServiceHistoryClick: () -> Unit,
+    onFixError: (String) -> Unit,
+    onFixAll: (List<String>) -> Unit
 ) {
 
     var showErrorDialog by remember { mutableStateOf(false) }
@@ -457,6 +893,12 @@ fun CarDetailsScreen(
 
     val errors = remember(vehicle) {
         InspectionManager.getInspectionErrors(vehicle)
+    }
+
+    val backgroundImg = when {
+        errors.size >= 10 -> R.drawable.rainy
+        errors.size >= 5 -> R.drawable.hazy
+        else -> R.drawable.sunny
     }
 
 
@@ -509,10 +951,15 @@ fun CarDetailsScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(180.dp)
-                        .background(Color.White)
                         .win98Border(pressed = true)
                         .padding(2.dp)
                 ) {
+                    Image(
+                        painter = painterResource(backgroundImg),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
                     Image(
                         painter = painterResource(car.imageRes),
                         contentDescription = car.title,
@@ -533,14 +980,8 @@ fun CarDetailsScreen(
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     val btnMod = Modifier.weight(1f).height(64.dp)
-                    CarActionButton(label = "UPDATE ODOMETER", iconRes = R.drawable.transmission, modifier = btnMod, onClick = {
-                        // TODO: Update to point to class for updating odometer
-                        onComponentClick(CarComponentInfo("Update Odometer", R.drawable.transmission))
-                    })
-                    CarActionButton(label = "ADD SERVICE HISTORY", iconRes = R.drawable.engine, modifier = btnMod, onClick = {
-                        onComponentClick(CarComponentInfo("Add Service History", R.drawable.engine))
-                        // TODO: Add service history script
-                    })
+                    CarActionButton(label = "UPDATE ODOMETER", iconRes = R.drawable.transmission, modifier = btnMod, onClick = onUpdateOdometer)
+                    CarActionButton(label = "SERVICE HISTORY", iconRes = R.drawable.engine, modifier = btnMod, onClick = onServiceHistoryClick)
                 }
                 Spacer(modifier = Modifier.height(24.dp))
             }
@@ -562,12 +1003,37 @@ fun CarDetailsScreen(
                         .background(Win98Blue)
                         .win98Border(false)
                         .padding(4.dp)
-                ) {Text(
-                    text = "Inspection Errors",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp,
-                    color = Color.White
-                )}
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Inspection Errors (${errors.size})",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp,
+                            color = Color.White
+                        )
+                        
+                        // Fix All Button
+                        if (errors.size > 1) {
+                            Box(
+                                modifier = Modifier
+                                    .background(Win98Gray)
+                                    .win98Border(false)
+                                    .clickable {
+                                        showErrorDialog = false
+                                        val serviceNames = errors.map { it.substringBefore(":") }
+                                        onFixAll(serviceNames)
+                                    }
+                                    .padding(horizontal = 8.dp, vertical = 2.dp)
+                            ) {
+                                Text("New Car / Fixed All", color = Win98Black, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    }
+                }
 
                 // Back button for dialog
                 Box(
@@ -595,15 +1061,18 @@ fun CarDetailsScreen(
                             .fillMaxWidth()
                             .heightIn(max = 300.dp)
                             .padding(horizontal = 4.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         errors.forEach { error ->
                             item {
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(vertical = 4.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween
+                                        .background(Color.White)
+                                        .win98Border(true)
+                                        .padding(8.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Text(
                                         text = error,
@@ -612,13 +1081,23 @@ fun CarDetailsScreen(
                                         modifier = Modifier.weight(1f)
                                     )
 
-                                    // Can change to going to the logs and filling on out
-                                    TextButton(onClick = {
-                                        resolvedErrors = resolvedErrors + error
-                                    }) {
+                                    Spacer(modifier = Modifier.width(8.dp))
+
+                                    // Direct to adding a service log
+                                    Box(
+                                        modifier = Modifier
+                                            .background(Win98Gray)
+                                            .win98Border(pressed = false)
+                                            .clickable {
+                                                showErrorDialog = false
+                                                val serviceName = error.substringBefore(":")
+                                                onFixError(serviceName)
+                                            }
+                                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                                    ) {
                                         Text(
-                                            "Fix",
-                                            color = Win98Blue,
+                                            "Fixed It",
+                                            color = Win98Black,
                                             fontWeight = FontWeight.Bold,
                                             fontSize = 12.sp
                                         )

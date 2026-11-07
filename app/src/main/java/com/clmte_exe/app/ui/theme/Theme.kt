@@ -8,7 +8,12 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.Density
+import com.clmte_exe.sub_apps.settings.ThemeManager
 
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
@@ -39,6 +44,11 @@ fun Win98Theme(
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
+    val density = LocalDensity.current
+    val scaledDensity = remember(density.density, ThemeManager.uiFontScale) {
+        Density(density = density.density, fontScale = ThemeManager.uiFontScale)
+    }
+
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
@@ -49,9 +59,11 @@ fun Win98Theme(
         else -> LightColorScheme
     }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        content = content
-    )
+    CompositionLocalProvider(LocalDensity provides scaledDensity) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = Typography,
+            content = content
+        )
+    }
 }

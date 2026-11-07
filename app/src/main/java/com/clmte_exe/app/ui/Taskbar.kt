@@ -5,7 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -15,6 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.clmte_exe.app.R
 import com.clmte_exe.sub_apps.settings.ThemeManager
+import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -69,6 +70,18 @@ fun Taskbar(
 
 @Composable
 private fun rememberTime(): String {
-    val formatter = SimpleDateFormat("hh:mm a", Locale.getDefault())
-    return formatter.format(Date())
+    val formatter = remember { SimpleDateFormat("hh:mm a", Locale.getDefault()) }
+    var time by remember { mutableStateOf(formatter.format(Date())) }
+
+    LaunchedEffect(Unit) {
+        while (true) {
+            val now = Calendar.getInstance()
+            time = formatter.format(now.time)
+            // Calculate delay until the start of the next minute to stay accurate
+            val secondsUntilNextMinute = 60 - now.get(Calendar.SECOND)
+            delay(secondsUntilNextMinute * 1000L)
+        }
+    }
+
+    return time
 }
